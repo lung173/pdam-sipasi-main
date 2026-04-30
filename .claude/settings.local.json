@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true\" npx ts-node --compiler-options \"{\\\\\"module\\\\\":\\\\\"CommonJS\\\\\"}\" prisma/seed.ts)",
+      "Bash(taskkill /PID 21724 /F)",
+      "PowerShell(Stop-Process -Id 21724 -Force)",
+      "Bash(xargs sed *)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true\" npx prisma db push)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true\" npx prisma db push --accept-data-loss)",
+      "PowerShell(Stop-Process -Id 30572 -Force)",
+      "PowerShell(Stop-Process -Id 27720 -Force)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "Bash(DIRECT_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres\" DATABASE_URL=\"postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true\" npx prisma generate)",
+      "Bash(npx tsc *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(exit 0)",
+      "Bash(rm -rf .next)",
+      "Bash(xargs grep *)",
+      "Bash(npx next *)",
+      "Bash(taskkill /PID 36052 /F)",
+      "PowerShell(taskkill /PID 36052 /F)",
+      "PowerShell(taskkill /PID 14128 /F)",
+      "Bash(python3 -)"
+    ]
+  }
+}

@@ -1,0 +1,218 @@
+// app/dashboard/admin/arsip/[id]/page.tsx
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { redirect, notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { ArrowLeft, FileText, Download, Calendar, User } from "lucide-react";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StatusTimeline } from "@/components/documents/StatusTimeline";
+import { AdminArchivePanel } from "@/components/documents/AdminArchivePanel";
+import { AgendarisActionPanel } from "@/components/documents/AgendarisActionPanel";
+import { DECISION_LABELS } from "@/types";
+import { DecisionType } from "@prisma/client";
+
+type Params = { params: Promise<{ id: string }> };
+
+export default async function AdminArsipDetail(props: Params) {
+  const params = await props.params;
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "AGENDARIS") redirect("/dashboard");
+
+  const [doc, staffUsers] = await Promise.all([
+    prisma.suratMasuk.findUnique({
+      where: { id: params.id },
+      include: {
+        createdBy: { select: { id: true, name: true, divisi: true, email: true } },
+        files: {
+          include: { uploadedBy: { select: { name: true } } },
+          orderBy: { uploadedAt: "desc" },
+        },
+        reviews: {
+          include: { reviewedBy: { select: { name: true } } },
+          orderBy: { reviewedAt: "desc" },
+          take: 3,
+        },
+        decisions: {
+          include: { director: { select: { name: true } } },
+          orderBy: { decidedAt: "desc" },
+          take: 1,
+        },
+        statusTimeline: { orderBy: { createdAt: "asc" } },
+        archive: { include: { archivedBy: { select: { name: true } } } },
+      },
+    }),
+    prisma.user.findMany({
+      where: { isActive: true, role: { in: ["ADMIN_STAFF", "KABAG", "KASUBAG"] } },
+      select: { id: true, name: true, divisi: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  if (!doc) notFound();
+
+  const latestDecision = doc.decisions[0];
+  const draftFiles = doc.files.filter((f) => f.fileType === "DRAFT");
+  const scanFiles = doc.files.filter((f) => f.fileType === "FINAL_SCAN");
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard/admin/arsip" className="p-2 hover:bg-gray-100 rounded-lg">
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <div>
+          <h1 className="page-title">Detail & Pengarsipan Dokumen</h1>
+          <p className="page-subtitle font-mono text-xs">{doc.nomorSurat}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Info card */}
+          <div className="card p-5 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-lg font-bold text-gray-900">{doc.perihal}</h2>
+              <StatusBadge status={doc.currentStatus} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <InfoRow icon={FileText} label="Nomor Surat" value={doc.nomorSurat} mono />
+              <InfoRow icon={Calendar} label="Tanggal Surat"
+                value={format(new Date(doc.tanggalSurat), "dd MMMM yyyy", { locale: localeId })} />
+              <InfoRow icon={User} label="Pembuat"
+                value={`${doc.createdBy.name} (${doc.createdBy.divisi ?? "-"})`} />
+              <InfoRow icon={User} label="Email" value={doc.createdBy.email} />
+            </div>
+
+            {doc.deskripsi && (
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Keterangan</p>
+                <p className="text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded-lg">{doc.deskripsi}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Keputusan Direktur */}
+          {latestDecision && (
+            <div className="card p-4 bg-purple-50 border-purple-200 space-y-2">
+              <p className="text-sm font-semibold text-purple-900">
+                Keputusan Direktur: {DECISION_LABELS[latestDecision.decisionType as DecisionType]}
+              </p>
+              {latestDecision.decisionNote && (
+                <p className="text-sm text-purple-700">{latestDecision.decisionNote}</p>
+              )}
+              <p className="text-xs text-purple-400">
+                {latestDecision.director.name} ·{" "}
+                {format(new Date(latestDecision.decidedAt), "dd MMM yyyy, HH:mm", { locale: localeId })}
+              </p>
+            </div>
+          )}
+
+          {/* Files - Draft */}
+          {draftFiles.length > 0 && (
+            <div className="card p-5 space-y-3">
+              <h3 className="font-semibold text-gray-900">File Draft</h3>
+              <div className="space-y-2">
+                {draftFiles.map((f) => (
+                  <FileRow key={f.id} file={f} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Files - Scan Final */}
+          <div className="card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">File Scan Final</h3>
+              {scanFiles.length > 0 && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  {scanFiles.length} file tersedia
+                </span>
+              )}
+            </div>
+            {scanFiles.length === 0 ? (
+              <p className="text-sm text-red-500 font-medium">Belum ada file scan final. Pastikan Staff sudah mengupload scan.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {scanFiles.map((f) => (
+                  <FileRow key={f.id} file={f} highlight />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Review action */}
+          <AgendarisActionPanel doc={doc} staffUsers={staffUsers} />
+
+          {/* Archive action */}
+          {!doc.archive ? (
+            <AdminArchivePanel doc={doc} hasScanFile={scanFiles.length > 0} />
+          ) : (
+            <div className="card p-5 bg-green-50 border-green-200 space-y-3">
+              <h3 className="font-semibold text-green-900 flex items-center gap-2">
+                ✅ Dokumen Sudah Diarsipkan
+              </h3>
+              <div className="text-sm text-green-800 space-y-1">
+                <p><span className="font-medium">Diarsipkan oleh:</span> {doc.archive.archivedBy.name}</p>
+                <p><span className="font-medium">Tanggal:</span>{" "}
+                  {format(new Date(doc.archive.archivedAt), "dd MMMM yyyy, HH:mm", { locale: localeId })}</p>
+                <p><span className="font-medium">Lokasi:</span>{" "}
+                  <code className="bg-green-100 px-1.5 rounded text-xs">{doc.archive.serverLocation}</code></p>
+                {doc.archive.notes && <p><span className="font-medium">Catatan:</span> {doc.archive.notes}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right */}
+        <div className="space-y-5">
+          <div className="card p-5">
+            <h3 className="font-semibold text-gray-900 mb-4">Riwayat Status</h3>
+            <StatusTimeline timeline={doc.statusTimeline} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({ icon: Icon, label, value, mono }: {
+  icon: React.ElementType; label: string; value: string; mono?: boolean;
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-0.5">
+        <Icon className="w-3.5 h-3.5 text-gray-400" />
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+      </div>
+      <p className={`text-sm text-gray-900 break-all ${mono ? "font-mono" : ""}`}>{value}</p>
+    </div>
+  );
+}
+
+function FileRow({ file, highlight }: {
+  file: { id: string; fileName: string; filePath: string; fileType: string; mimeType: string | null; fileSize: number | null; uploadedBy: { name: string }; uploadedAt: Date | string };
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-lg border ${highlight ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"}`}>
+      <FileText className={`w-5 h-5 shrink-0 ${highlight ? "text-green-600" : "text-blue-500"}`} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{file.fileName}</p>
+        <p className="text-xs text-gray-400">
+          {file.fileType} · {file.uploadedBy.name}
+          {file.fileSize ? ` · ${(file.fileSize / 1024).toFixed(0)} KB` : ""}
+        </p>
+      </div>
+      <a href={file.filePath} target="_blank" rel="noreferrer"
+        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
+        <Download className="w-4 h-4" />
+      </a>
+    </div>
+  );
+}
