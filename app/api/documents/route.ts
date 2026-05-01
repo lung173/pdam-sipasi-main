@@ -1,4 +1,4 @@
-﻿// app/api/documents/route.ts
+// app/api/documents/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
@@ -81,7 +81,13 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const { nomorSurat, perihal, deskripsi, tujuan, tanggalSurat } = parsed.data;
+      const { nomorSurat: rawNomor, perihal, deskripsi, tujuan, tanggalSurat } = parsed.data;
+
+      // Jika staff tidak mengisi nomor surat, auto-generate nomor draft sementara
+      const today = new Date();
+      const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      const nomorSurat = rawNomor ?? `DRAFT-${dateStr}-${suffix}`;
 
       // Cek nomor surat duplikat
       const existing = await prisma.suratMasuk.findUnique({ where: { nomorSurat } });

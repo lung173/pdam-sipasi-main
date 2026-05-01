@@ -17,11 +17,16 @@ export async function POST(req: NextRequest, props: Params) {
 
     try {
       const body = await request.json();
-      const { keId, instruksi, keterangan, tanggalPenyelesaian } = body as {
+      const { keId, instruksi, keterangan, tanggalPenyelesaian, nomorSurat, perihal, asalSurat, nomorAgenda, tanggalTerima } = body as {
         keId: string;
         instruksi?: string;
         keterangan?: string;
         tanggalPenyelesaian?: string;
+        nomorSurat?: string;
+        perihal?: string;
+        asalSurat?: string;
+        nomorAgenda?: string;
+        tanggalTerima?: string;
       };
 
       if (!keId) return errorResponse("Pilih penerima disposisi.", 400);
@@ -49,7 +54,15 @@ export async function POST(req: NextRequest, props: Params) {
         }),
         prisma.suratMasuk.update({
           where: { id: doc.id },
-          data: { currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR" as never },
+          data: {
+            currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR" as never,
+            // Update document fields if Agendaris corrected them
+            ...(nomorSurat   && { nomorSurat }),
+            ...(perihal      && { perihal }),
+            ...(asalSurat    && { asalSurat }),
+            ...(nomorAgenda  && { nomorAgenda }),
+            ...(tanggalTerima && { tanggalTerima: new Date(tanggalTerima) }),
+          },
         }),
       ]);
 

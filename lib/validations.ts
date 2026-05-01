@@ -18,7 +18,7 @@ export const createUserSchema = z.object({
     .min(8, "Password minimal 8 karakter")
     .regex(/[A-Z]/, "Harus ada huruf kapital")
     .regex(/[0-9]/, "Harus ada angka"),
-  role: z.enum(["STAFF", "AGENDARIS", "DIREKTUR", "AGENDARIS"]),
+  role: z.enum(["ADMIN_STAFF", "AGENDARIS", "DIREKTUR", "KABAG", "KASUBAG"]),
   divisi: z.string().max(100).optional(),
 });
 
@@ -39,7 +39,8 @@ export const createDocumentSchema = z.object({
   nomorSurat: z
     .string()
     .min(3, "Nomor surat terlalu pendek")
-    .max(100, "Nomor surat terlalu panjang"),
+    .max(100, "Nomor surat terlalu panjang")
+    .optional(),
   perihal: z.string().min(5, "Perihal minimal 5 karakter").max(500),
   deskripsi: z.string().max(2000).optional(),
   tujuan: z.string().max(200).optional(),

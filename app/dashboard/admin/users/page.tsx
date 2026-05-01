@@ -24,7 +24,7 @@ export default async function AdminUsersPage() {
       divisi: true,
       isActive: true,
       createdAt: true,
-      _count: { select: { documentsCreated: true } },
+      _count: { select: { suratMasukCreated: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -59,7 +59,7 @@ export default async function AdminUsersPage() {
         initialUsers={users.map((u) => ({
           ...u,
           createdAt: u.createdAt.toISOString(),
-          docCount: u._count.documentsCreated,
+          docCount: u._count.suratMasukCreated,
         }))}
         currentUserId={session.user.id}
       />

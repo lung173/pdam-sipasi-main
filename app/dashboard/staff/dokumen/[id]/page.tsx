@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { FileUpload } from "@/components/documents/FileUpload";
 import { StaffActionPanel } from "@/components/documents/StaffActionPanel";
+import { DisposisiViewer } from "@/components/documents/DisposisiViewer";
 import { DECISION_LABELS } from "@/types";
 import { DecisionType } from "@prisma/client";
 
@@ -39,6 +40,14 @@ export default async function StaffDocumentDetail(props: Params) {
         orderBy: { decidedAt: "desc" },
         take: 1,
       },
+      disposisi: {
+        include: {
+          dari: { select: { name: true } },
+          ke:   { select: { name: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
       statusTimeline: { orderBy: { createdAt: "asc" } },
       archive: { include: { archivedBy: { select: { name: true } } } },
     },
@@ -48,7 +57,8 @@ export default async function StaffDocumentDetail(props: Params) {
   if (doc.createdById !== session.user.id) redirect("/dashboard/staff");
 
   const latestDecision = doc.decisions[0];
-  const latestReview = doc.reviews[0];
+  const latestReview   = doc.reviews[0];
+  const latestDisposisi = doc.disposisi[0] ?? null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -116,6 +126,21 @@ export default async function StaffDocumentDetail(props: Params) {
                 {format(new Date(latestDecision.decidedAt), "dd MMM yyyy", { locale: localeId })}
               </p>
             </div>
+          )}
+
+          {/* Lembar Disposisi — visible to staff only after Direktur issues a DISPOSISI decision */}
+          {latestDisposisi && (
+            <DisposisiViewer
+              disposisi={latestDisposisi}
+              doc={{
+                nomorSurat:   doc.nomorSurat,
+                perihal:      doc.perihal,
+                asalSurat:    doc.asalSurat,
+                nomorAgenda:  doc.nomorAgenda,
+                tanggalSurat: doc.tanggalSurat,
+                tanggalTerima: doc.tanggalTerima,
+              }}
+            />
           )}
 
           {/* Files */}

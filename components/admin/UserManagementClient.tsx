@@ -29,13 +29,14 @@ interface FormState {
   divisi: string;
 }
 
-const ROLES: UserRole[] = ["STAFF", "AGENDARIS", "DIREKTUR", "AGENDARIS"];
+const ROLES: UserRole[] = ["ADMIN_STAFF", "AGENDARIS", "DIREKTUR", "KABAG", "KASUBAG"];
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  STAFF:     "bg-blue-100 text-blue-700",
-  AGENDARIS: "bg-purple-100 text-purple-700",
-  DIREKTUR:  "bg-red-100 text-red-700",
-  ADMIN:     "bg-gray-800 text-white",
+  ADMIN_STAFF: "bg-blue-100 text-blue-700",
+  AGENDARIS:   "bg-purple-100 text-purple-700",
+  DIREKTUR:    "bg-red-100 text-red-700",
+  KABAG:       "bg-amber-100 text-amber-700",
+  KASUBAG:     "bg-gray-100 text-gray-700",
 };
 
 export function UserManagementClient({
@@ -51,7 +52,7 @@ export function UserManagementClient({
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
   const [editTarget, setEditTarget] = useState<UserItem | null>(null);
   const [form, setForm] = useState<FormState>({
-    name: "", email: "", password: "", role: "STAFF", divisi: "",
+    name: "", email: "", password: "", role: "ADMIN_STAFF", divisi: "",
   });
   const [errors, setErrors] = useState<Partial<FormState>>({});
 
@@ -62,7 +63,7 @@ export function UserManagementClient({
   );
 
   const openCreate = () => {
-    setForm({ name: "", email: "", password: "", role: "STAFF", divisi: "" });
+    setForm({ name: "", email: "", password: "", role: "ADMIN_STAFF", divisi: "" });
     setErrors({});
     setModal("create");
   };

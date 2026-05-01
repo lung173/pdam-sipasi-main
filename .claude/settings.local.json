@@ -25,7 +25,13 @@
       "Bash(taskkill /PID 36052 /F)",
       "PowerShell(taskkill /PID 36052 /F)",
       "PowerShell(taskkill /PID 14128 /F)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(tasklist)",
+      "Bash(tasklist /fi \"imagename eq node.exe\" /v)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-NetTCPConnection -State Listen | Where-Object { $_.OwningProcess -in @\\(5268, 14380, 18420, 32204\\) } | Select-Object LocalAddress, LocalPort, OwningProcess | Sort-Object LocalPort)",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Stop-Process -Id 18420 -Force)"
     ]
   }
 }

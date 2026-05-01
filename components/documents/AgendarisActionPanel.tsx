@@ -55,11 +55,25 @@ export function AgendarisActionPanel({
   const [keterangan, setKeterangan] = useState("");
   const [tanggalPenyelesaian, setTanggalPenyelesaian] = useState("");
 
+  // Editable document fields (Agendaris dapat mengoreksi saat buat disposisi)
+  const toDateInput = (d?: Date | string) =>
+    d ? new Date(d as string).toISOString().split("T")[0] : "";
+  const [editNomorSurat, setEditNomorSurat] = useState(doc.nomorSurat ?? "");
+  const [editPerihal, setEditPerihal] = useState(doc.perihal ?? "");
+  const [editTanggalTerima, setEditTanggalTerima] = useState(toDateInput(doc.tanggalTerima));
+  const [editAsalSurat, setEditAsalSurat] = useState(doc.asalSurat ?? "");
+  const [editNomorAgenda, setEditNomorAgenda] = useState(doc.nomorAgenda ?? "");
+
   const reset = () => {
     setMode("idle");
     setReviewNote(""); setRevisiNote("");
     setKeId(""); setInstruksi(""); setKeterangan(""); setTanggalPenyelesaian("");
     setWaktu("LANGSUNG"); setIsUrgen(false);
+    setEditNomorSurat(doc.nomorSurat ?? "");
+    setEditPerihal(doc.perihal ?? "");
+    setEditTanggalTerima(toDateInput(doc.tanggalTerima));
+    setEditAsalSurat(doc.asalSurat ?? "");
+    setEditNomorAgenda(doc.nomorAgenda ?? "");
   };
 
   const submitTeruskan = async () => {
@@ -111,7 +125,16 @@ export function AgendarisActionPanel({
       const res = await fetch(`/api/documents/${doc.id}/disposisi`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keId, instruksi, keterangan, tanggalPenyelesaian: tanggalPenyelesaian || undefined }),
+        body: JSON.stringify({
+          keId, instruksi, keterangan,
+          tanggalPenyelesaian: tanggalPenyelesaian || undefined,
+          // Document field corrections
+          nomorSurat: editNomorSurat || undefined,
+          perihal: editPerihal || undefined,
+          asalSurat: editAsalSurat || undefined,
+          nomorAgenda: editNomorAgenda || undefined,
+          tanggalTerima: editTanggalTerima || undefined,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Gagal.");
@@ -255,19 +278,58 @@ export function AgendarisActionPanel({
                 </p>
               </div>
 
-              {/* Info rows: Tanggal Surat / Tanggal Terima, Asal Surat / Agenda, Perihal / Nomor Surat */}
+              {/* Info rows: Tanggal Surat (static) + editable fields */}
               <div className="divide-y divide-gray-300 border-b-2 border-gray-400">
+                {/* Row 1: Tanggal Surat (read-only) | Tanggal Terima (editable) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
                   <FormInfoRow label="Tanggal Surat" value={fmtDate(doc.tanggalSurat)} />
-                  <FormInfoRow label="Tanggal Terima" value={fmtDate(doc.tanggalTerima)} />
+                  <FormEditRow label="Tanggal Terima">
+                    <input
+                      type="date"
+                      className="form-input text-xs py-1"
+                      value={editTanggalTerima}
+                      onChange={(e) => setEditTanggalTerima(e.target.value)}
+                    />
+                  </FormEditRow>
                 </div>
+                {/* Row 2: Asal Surat | Agenda */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
-                  <FormInfoRow label="Asal Surat" value={doc.asalSurat || "-"} />
-                  <FormInfoRow label="Agenda" value={doc.nomorAgenda || "-"} />
+                  <FormEditRow label="Asal Surat">
+                    <input
+                      className="form-input text-xs py-1"
+                      placeholder="Asal surat..."
+                      value={editAsalSurat}
+                      onChange={(e) => setEditAsalSurat(e.target.value)}
+                    />
+                  </FormEditRow>
+                  <FormEditRow label="Agenda">
+                    <input
+                      className="form-input text-xs py-1 font-mono"
+                      placeholder="No. agenda..."
+                      value={editNomorAgenda}
+                      onChange={(e) => setEditNomorAgenda(e.target.value)}
+                    />
+                  </FormEditRow>
                 </div>
+                {/* Row 3: Perihal | Nomor Surat */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
-                  <FormInfoRow label="Perihal" value={doc.perihal || "-"} multiline />
-                  <FormInfoRow label="Nomor Surat" value={doc.nomorSurat || "-"} mono />
+                  <FormEditRow label="Perihal">
+                    <textarea
+                      className="form-input text-xs py-1 resize-none"
+                      rows={2}
+                      placeholder="Perihal surat..."
+                      value={editPerihal}
+                      onChange={(e) => setEditPerihal(e.target.value)}
+                    />
+                  </FormEditRow>
+                  <FormEditRow label="Nomor Surat">
+                    <input
+                      className="form-input text-xs py-1 font-mono"
+                      placeholder="Nomor surat..."
+                      value={editNomorSurat}
+                      onChange={(e) => setEditNomorSurat(e.target.value)}
+                    />
+                  </FormEditRow>
                 </div>
               </div>
 
@@ -463,6 +525,15 @@ function FormInfoRow({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+function FormEditRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1 px-3 py-2">
+      <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">{label}</span>
+      {children}
     </div>
   );
 }

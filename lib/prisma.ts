@@ -11,8 +11,9 @@ const connectionString = (envUrl && envUrl.includes("supabase.com")) ? envUrl : 
 
 const pool = new Pool({ 
   connectionString,
-  max: 10,
-  connectionTimeoutMillis: 5000,
+  max: 3,                          // Jaga dari limit free tier Supabase (max ~20)
+  connectionTimeoutMillis: 15000,  // 15 detik (naik dari 5 detik)
+  idleTimeoutMillis: 30000,        // Tutup koneksi idle setelah 30 detik
   ssl: { rejectUnauthorized: false }
 });
 const adapter = new PrismaPg(pool);

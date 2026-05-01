@@ -1,4 +1,4 @@
-﻿// app/dashboard/staff/page.tsx
+// app/dashboard/staff/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
@@ -11,6 +11,7 @@ import {
   FileText, Clock, AlertTriangle, CheckCircle,
   ArrowRight, FileScan,
 } from "lucide-react";
+import { AjukanSuratButton } from "@/components/layout/AjukanSuratButton";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
@@ -38,11 +39,12 @@ export default async function StaffDashboard() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="page-header">
+      <div className="page-header flex items-center justify-between">
         <div>
           <h1 className="page-title">Dashboard Staff</h1>
           <p className="page-subtitle">Pantau status dokumen dan surat Anda</p>
         </div>
+        <AjukanSuratButton />
       </div>
 
       {/* Stat cards */}
