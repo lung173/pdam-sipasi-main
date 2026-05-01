@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIPAS PDAM (Sistem Informasi Alur Surat PDAM)
 
-## Getting Started
+Sistem Informasi Manajemen Surat berbasis web yang dirancang khusus untuk mendigitalisasi proses administrasi dan persuratan di lingkungan PDAM. Aplikasi ini menggunakan arsitektur modern untuk memastikan proses persuratan berjalan dengan efisien, dengan fitur andalan seperti pelacakan status dokumen secara real-time, manajemen disposisi, serta tanda tangan digital menggunakan QR Code (Barcode).
 
-First, run the development server:
+## 🚀 Fitur Utama
+1. **Multi-Role Access**: Mendukung 3 peran utama secara dinamis (**Direktur, Agendaris, dan Admin Staff**) dengan fungsi antarmuka spesifik.
+2. **Manajemen Surat Masuk & Keluar**: Pencatatan metadata surat, fitur unggah file lampiran (berkapasitas besar), hingga proses pengarsipan.
+3. **Tracking Status Dokumen**: Memantau pergerakan dokumen secara visual dari status `Draft` hingga `Arsip Final Tersimpan`.
+4. **Sistem Review & Disposisi**: Meneruskan surat untuk direview (Agendaris ke Direktur), hingga menerbitkan lembar disposisi / arahan kerja (Direktur ke Staff).
+5. **Tanda Tangan Digital (QR Code)**: Pengesahan dokumen PDF secara otomatis. Direktur cukup menekan tombol "Setujui", dan sistem akan menempelkan Barcode / Paraf QR Code ke dalam PDF secara utuh beserta halaman verifikasi publik.
+6. **Manajemen Jadwal & Undangan**: Fitur undangan digital lengkap dengan status baca penerima rapat.
 
+## 💻 Tech Stack (Teknologi yang Digunakan)
+- **Frontend**: Next.js (React), Tailwind CSS, Lucide Icons, React Hook Form
+- **Backend**: Next.js API Routes (App Router)
+- **Autentikasi**: NextAuth.js
+- **Database**: PostgreSQL (Via Supabase)
+- **ORM**: Prisma Client v7 (Menggunakan Prisma Adapter PG untuk *Connection Pooling*)
+- **Utility**: `pdf-lib` (Manipulasi File PDF) & `qrcode` (Pembuatan Barcode)
+
+---
+
+## 🛠️ Langkah-Langkah Instalasi & Menjalankan Projek
+
+Ikuti panduan langkah demi langkah di bawah ini untuk menjalankan projek di komputer lokal Anda:
+
+### 1. Kebutuhan Sistem (Prerequisites)
+Pastikan komputer Anda sudah terinstal perangkat lunak berikut:
+- [Node.js](https://nodejs.org/en/) (Disarankan versi 18 atau 20 LTS)
+- Akun [Supabase](https://supabase.com/) aktif untuk layanan database PostgreSQL gratis.
+
+### 2. Kloning dan Install Dependensi
+Buka terminal / command prompt, arahkan ke folder projek, lalu jalankan perintah instalasi Node Package Manager (NPM):
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Konfigurasi Variabel Lingkungan (Environment)
+Aplikasi membutuhkan koneksi ke database. Buat file bernama `.env` di direktori paling luar (root), kemudian salin kode berikut dan isi sesuai kredensial database Anda (Anda bisa mencontoh file `.env.local`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+# URL koneksi Supabase menggunakan Connection Pooling (port 6543)
+DATABASE_URL="postgresql://[USER]:[PASSWORD]@[HOST]:6543/postgres?pgbouncer=true"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# URL koneksi langsung untuk Migrasi Schema (port 5432)
+DIRECT_URL="postgresql://[USER]:[PASSWORD]@[HOST]:5432/postgres"
 
-## Learn More
+# Kunci rahasia untuk sistem Login NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="koderahasia_bebas_diisi_apa_saja"
 
-To learn more about Next.js, take a look at the following resources:
+# Informasi Aplikasi Dasar
+NEXT_PUBLIC_APP_NAME="SIPAS PDAM"
+NEXT_PUBLIC_APP_VERSION="1.0.0"
+```
+> **⚠️ PENTING:** 
+> Jika password database Anda memiliki karakter spesial (contoh: `@`, `#`, `?`), pastikan untuk melakukan URL-Encode. Sebagai contoh, karakter `@` diganti dengan `%40`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Setup Database (Prisma)
+Setelah `.env` terisi, Anda perlu membuat tabel-tabel di database dan membuat Prisma Client untuk menyambungkannya dengan kode aplikasi:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# 1. Melakukan generate struktur Prisma Client (Wajib setiap kali merubah schema)
+npm run db:generate
 
-## Deploy on Vercel
+# 2. Push / Migrasi struktur tabel ke Database Supabase
+npm run db:migrate
+```
+*(Opsional: Jika Anda ingin menambahkan data akun awal, jalankan perintah `npm run db:seed`)*
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5. Menjalankan Server Aplikasi
+Setelah konfigurasi dan database siap, jalankan aplikasi di mode *development*:
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Selamat! Aplikasi sudah berjalan. Buka browser kesayangan Anda dan akses ke:
+👉 **[http://localhost:3000](http://localhost:3000)**
+
+---
+**Catatan Penting Pengembang:**
+- File PDF dan gambar unggahan akan disimpan sementara di direktori `public/uploads`.
+- Konfigurasi `lib/prisma.ts` sudah disesuaikan secara khusus agar tidak bentrokan dengan limitasi *connection pool* bawaan ketika menggunakan Supabase.

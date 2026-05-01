@@ -3,7 +3,11 @@ import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const fallbackUrl = "postgresql://postgres.gjbxkpknswknodxecxvj:pdamsukoharjoDB2024@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true";
+const envUrl = process.env.DATABASE_URL;
+
+// If envUrl is missing or seems to be a placeholder (like "base"), use the fallback from .env
+const connectionString = (envUrl && envUrl.includes("supabase.com")) ? envUrl : fallbackUrl;
 
 const pool = new Pool({ 
   connectionString,
