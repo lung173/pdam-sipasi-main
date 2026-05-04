@@ -198,9 +198,17 @@ export default async function AdminArsipDetail(props: Params) {
                 <div className="grid grid-cols-2 divide-x divide-gray-300 border-b-2 border-gray-400 text-xs">
                   <div className="p-3">
                     <p className="font-bold text-gray-700 uppercase tracking-wide mb-2">Disposisi Kepada :</p>
-                    <p className="text-gray-900 font-semibold text-sm">
-                      {latestDisposisi?.jabatanKe ?? "-"}
-                    </p>
+                    <div className="text-gray-900 font-semibold text-sm">
+                      {latestDisposisi?.jabatanKe ? (
+                        <ul className="list-decimal pl-4 space-y-0.5">
+                          {latestDisposisi.jabatanKe.split(",").map((j, i) => (
+                            <li key={i}>{j.trim()}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>-</p>
+                      )}
+                    </div>
                   </div>
                   <div className="p-3 space-y-2">
                     <div>

@@ -77,9 +77,19 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
             <p className="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wide">
               Disposisi Kepada :
             </p>
-            <p className="text-xs text-gray-900 px-2 py-1.5 bg-blue-50 ring-1 ring-blue-400 rounded">
-              {disposisi.jabatanKe ?? disposisi.ke?.name ?? "-"}
-            </p>
+            <div className="text-xs text-gray-900 px-3 py-2 bg-blue-50 ring-1 ring-blue-400 rounded">
+              {disposisi.jabatanKe ? (
+                <ul className="list-decimal pl-3 space-y-0.5">
+                  {disposisi.jabatanKe.split(",").map((j, i) => (
+                    <li key={i}>{j.trim()}</li>
+                  ))}
+                </ul>
+              ) : disposisi.ke?.name ? (
+                <p>{disposisi.ke.name}</p>
+              ) : (
+                <p>-</p>
+              )}
+            </div>
           </div>
 
           {/* Right */}

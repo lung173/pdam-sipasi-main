@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { UserRole } from "@prisma/client";
@@ -13,6 +14,11 @@ interface Props {
 
 export function DashboardShell({ role, userName, user, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname?.endsWith("/cetak-disposisi")) {
+    return <div className="min-h-screen bg-white text-black">{children}</div>;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">

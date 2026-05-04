@@ -153,19 +153,60 @@ export function AgendarisActionPanel({
   // ─── MENUNGGU REVIEW ────────────────────────────────────────
   if (doc.currentStatus === "MENUNGGU_REVIEW_AGENDARIS") {
     return (
-      <div className="card p-5 space-y-4">
-        <h3 className="font-semibold text-gray-900">Tindakan Review</h3>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md">
+        <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2.5">
+            <span className="w-1.5 h-5 rounded-full bg-blue-500 shadow-sm"></span>
+            Tindakan Review
+          </h3>
+          <p className="text-xs text-gray-500 mt-1 ml-4">
+            Pilih tindakan untuk memproses dokumen ini ke tahap selanjutnya.
+          </p>
+        </div>
 
+        <div className="p-6 space-y-6">
         {mode === "idle" && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button onClick={() => setMode("teruskan")} className="btn-success justify-center">
-              <Send className="w-4 h-4" /> Teruskan ke Direktur
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={() => setMode("teruskan")}
+              className="relative flex flex-col items-center justify-center p-6 gap-3 rounded-2xl border-2 border-emerald-100 bg-gradient-to-b from-emerald-50 to-white text-emerald-800 shadow-sm hover:border-emerald-500 hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-emerald-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white shadow-sm transition-all duration-300">
+                <Send className="w-6 h-6 ml-1" />
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-sm mb-1">Teruskan ke Direktur</div>
+                <div className="text-xs text-emerald-600/80">Kirim jadwal pengiriman</div>
+              </div>
             </button>
-            <button onClick={() => setMode("kembalikan")} className="btn-danger justify-center">
-              <RotateCcw className="w-4 h-4" /> Kembalikan ke Staff
+
+            <button
+              onClick={() => setMode("kembalikan")}
+              className="relative flex flex-col items-center justify-center p-6 gap-3 rounded-2xl border-2 border-rose-100 bg-gradient-to-b from-rose-50 to-white text-rose-800 shadow-sm hover:border-rose-500 hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-rose-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-rose-100 text-rose-600 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white shadow-sm transition-all duration-300">
+                <RotateCcw className="w-6 h-6" />
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-sm mb-1">Kembalikan ke Staff</div>
+                <div className="text-xs text-rose-600/80">Revisi draf dokumen</div>
+              </div>
             </button>
-            <button onClick={() => setMode("disposisi")} className="btn-secondary justify-center">
-              <GitBranch className="w-4 h-4" /> Buat Disposisi
+
+            <button
+              onClick={() => setMode("disposisi")}
+              className="relative flex flex-col items-center justify-center p-6 gap-3 rounded-2xl border-2 border-blue-100 bg-gradient-to-b from-blue-50 to-white text-blue-800 shadow-sm hover:border-blue-500 hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white shadow-sm transition-all duration-300">
+                <GitBranch className="w-6 h-6" />
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-sm mb-1">Buat Disposisi</div>
+                <div className="text-xs text-blue-600/80">Isi lembar disposisi</div>
+              </div>
             </button>
           </div>
         )}
@@ -438,6 +479,7 @@ export function AgendarisActionPanel({
             </div>
           </div>
         )}
+        </div>
       </div>
     );
   }

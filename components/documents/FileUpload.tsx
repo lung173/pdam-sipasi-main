@@ -21,7 +21,7 @@ export function FileUpload({ documentId, fileType, onSuccess, label, disabled }:
   const inputRef = useRef<HTMLInputElement>(null);
 
   const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
-  const MAX_MB = 10;
+  const MAX_MB = 20;
 
   const validateAndSet = (file: File) => {
     if (!ALLOWED.includes(file.type)) {

@@ -26,7 +26,7 @@ export function AjukanSuratModal({ open, onClose }: Props) {
   const [error, setError] = useState("");
 
   const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
-  const MAX_MB = 10;
+  const MAX_MB = 20;
 
   const reset = () => {
     setPerihal("");

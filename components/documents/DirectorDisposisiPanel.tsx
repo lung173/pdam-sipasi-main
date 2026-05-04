@@ -15,6 +15,16 @@ const JABATAN_OPTIONS = [
   "Kacab. Selatan",
 ];
 
+const INSTRUKSI_OPTIONS = [
+  "Selesaikan / Tindak Lanjuti",
+  "Tanggapan / Saran",
+  "Untuk Diketahui / Diperhatikan",
+  "Siapkan Laporan / Konsep",
+  "Mewakili Saya",
+  "Bicarakan dengan Saya",
+  "Edarkan",
+];
+
 interface DirectorDisposisiPanelProps {
   docId: string;
   existingDisposisi?: {
@@ -28,8 +38,20 @@ interface DirectorDisposisiPanelProps {
 
 export function DirectorDisposisiPanel({ docId, existingDisposisi }: DirectorDisposisiPanelProps) {
   const router = useRouter();
-  const [jabatanKe, setJabatanKe] = useState(existingDisposisi?.jabatanKe ?? "");
-  const [instruksi, setInstruksi] = useState(existingDisposisi?.instruksi ?? "");
+  const [jabatanKe, setJabatanKe] = useState<string[]>(() => {
+    if (!existingDisposisi?.jabatanKe) return [];
+    return existingDisposisi.jabatanKe.split(",").map(j => j.trim());
+  });
+  const [selectedInstruksi, setSelectedInstruksi] = useState<string[]>(() => {
+    if (!existingDisposisi?.instruksi) return [];
+    const parts = existingDisposisi.instruksi.split("\n");
+    return parts.map(p => p.replace(/^- /, "").trim()).filter(p => INSTRUKSI_OPTIONS.includes(p));
+  });
+  const [customInstruksi, setCustomInstruksi] = useState(() => {
+    if (!existingDisposisi?.instruksi) return "";
+    const parts = existingDisposisi.instruksi.split("\n");
+    return parts.filter(p => !INSTRUKSI_OPTIONS.includes(p.replace(/^- /, "").trim())).join("\n");
+  });
   const [keterangan, setKeterangan] = useState(existingDisposisi?.keterangan ?? "");
   const [tanggalPenyelesaian, setTanggalPenyelesaian] = useState(
     existingDisposisi?.tanggalTandaTangan
@@ -40,12 +62,17 @@ export function DirectorDisposisiPanel({ docId, existingDisposisi }: DirectorDis
   const [saved, setSaved] = useState(false);
 
   const submit = async () => {
-    if (!jabatanKe) {
+    if (jabatanKe.length === 0) {
       toast.error("Pilih penerima disposisi.");
       return;
     }
-    if (!instruksi.trim()) {
-      toast.error("Isi instruksi/informasi wajib diisi.");
+    const finalInstruksi = [
+      ...selectedInstruksi.map(i => `- ${i}`),
+      customInstruksi.trim()
+    ].filter(Boolean).join("\n");
+
+    if (!finalInstruksi) {
+      toast.error("Isi instruksi/informasi wajib diisi (pilih opsi atau ketik).");
       return;
     }
 
@@ -55,8 +82,8 @@ export function DirectorDisposisiPanel({ docId, existingDisposisi }: DirectorDis
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          jabatanKe,
-          instruksi,
+          jabatanKe: jabatanKe.join(", "),
+          instruksi: finalInstruksi,
           keterangan: keterangan || undefined,
           tanggalPenyelesaian: tanggalPenyelesaian || undefined,
         }),
@@ -95,18 +122,23 @@ export function DirectorDisposisiPanel({ docId, existingDisposisi }: DirectorDis
             <label
               key={jabatan}
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer text-xs transition-colors ${
-                jabatanKe === jabatan
+                jabatanKe.includes(jabatan)
                   ? "border-blue-500 bg-blue-50 text-blue-900 font-medium ring-1 ring-blue-400"
                   : "border-gray-200 hover:border-gray-300 text-gray-700"
               }`}
             >
               <input
-                type="radio"
-                name="jabatan-ke"
-                value={jabatan}
-                checked={jabatanKe === jabatan}
-                onChange={() => setJabatanKe(jabatan)}
+                type="checkbox"
+                checked={jabatanKe.includes(jabatan)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setJabatanKe([...jabatanKe, jabatan]);
+                  } else {
+                    setJabatanKe(jabatanKe.filter(j => j !== jabatan));
+                  }
+                }}
                 className="accent-blue-600 shrink-0"
+                disabled={loading}
               />
               {jabatan}
             </label>
@@ -116,15 +148,44 @@ export function DirectorDisposisiPanel({ docId, existingDisposisi }: DirectorDis
 
       {/* Isi Instruksi / Informasi */}
       <div>
-        <label className="form-label">
+        <label className="form-label mb-2">
           Isi Instruksi / Informasi <span className="text-red-500">*</span>
         </label>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+          {INSTRUKSI_OPTIONS.map((opt) => (
+            <label
+              key={opt}
+              className={`flex items-start gap-2 px-3 py-2.5 rounded-lg border cursor-pointer text-xs transition-colors ${
+                selectedInstruksi.includes(opt)
+                  ? "border-blue-500 bg-blue-50 text-blue-900 font-medium ring-1 ring-blue-400"
+                  : "border-gray-200 hover:border-gray-300 text-gray-700"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedInstruksi.includes(opt)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedInstruksi([...selectedInstruksi, opt]);
+                  } else {
+                    setSelectedInstruksi(selectedInstruksi.filter(i => i !== opt));
+                  }
+                }}
+                className="accent-blue-600 mt-0.5 shrink-0"
+                disabled={loading}
+              />
+              <span className="leading-tight">{opt}</span>
+            </label>
+          ))}
+        </div>
+
         <textarea
           className="form-input resize-none"
-          rows={4}
-          placeholder="Tuliskan instruksi yang harus dilaksanakan..."
-          value={instruksi}
-          onChange={(e) => setInstruksi(e.target.value)}
+          rows={2}
+          placeholder="Instruksi tambahan / lain-lain (opsional)..."
+          value={customInstruksi}
+          onChange={(e) => setCustomInstruksi(e.target.value)}
           disabled={loading}
         />
       </div>

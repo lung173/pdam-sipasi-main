@@ -97,7 +97,16 @@ export async function POST(req: NextRequest, props: Params) {
         tanggalPenyelesaian?: string;
       };
 
-      if (!jabatanKe || !JABATAN_VALID.includes(jabatanKe)) {
+      if (!jabatanKe) {
+        return errorResponse(
+          `Pilih penerima disposisi yang valid: ${JABATAN_VALID.join(", ")}.`,
+          400
+        );
+      }
+      
+      const selectedJabatans = jabatanKe.split(",").map(j => j.trim());
+      const allValid = selectedJabatans.every(j => JABATAN_VALID.includes(j));
+      if (!allValid) {
         return errorResponse(
           `Pilih penerima disposisi yang valid: ${JABATAN_VALID.join(", ")}.`,
           400

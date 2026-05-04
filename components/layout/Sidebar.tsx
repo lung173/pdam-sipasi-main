@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   FileText, LayoutDashboard, Users, ClipboardList,
-  Archive, CheckSquare, BookOpen, LogOut, FileSearch, X,
+  Archive, CheckSquare, BookOpen, LogOut, FileSearch, X, UserCog
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { UserRole } from "@prisma/client";
@@ -70,6 +70,7 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
   return (
     <aside
       className={cn(
+        "print:hidden",
         "w-64 bg-blue-900 text-white flex flex-col shrink-0 z-30 transition-transform duration-300",
         /* Desktop: always visible */
         "md:relative md:translate-x-0",
@@ -131,17 +132,7 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t border-blue-800">
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-blue-200
-                     hover:bg-blue-800 hover:text-white transition-colors"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          Keluar
-        </button>
-      </div>
+
     </aside>
   );
 }

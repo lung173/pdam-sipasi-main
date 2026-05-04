@@ -17,7 +17,6 @@ const DECISION_OPTIONS: { type: DecisionType; label: string; icon: React.Element
 export function DirectorDecisionPanel({ doc }: { doc: DocProps }) {
   const router = useRouter();
   const [selected, setSelected] = useState<DecisionType | null>(null);
-  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [autoSign, setAutoSign] = useState(false);
@@ -33,7 +32,7 @@ export function DirectorDecisionPanel({ doc }: { doc: DocProps }) {
       const res = await fetch(`/api/documents/${doc.id}/decision`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decisionType: selected, decisionNote: note, autoSign }),
+        body: JSON.stringify({ decisionType: selected, autoSign }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Gagal menyimpan keputusan.");
@@ -100,21 +99,6 @@ export function DirectorDecisionPanel({ doc }: { doc: DocProps }) {
         </div>
       )}
 
-      {/* Note */}
-      <div>
-        <label className="form-label">
-          Catatan / Disposisi{" "}
-          <span className="text-gray-400 font-normal">(opsional)</span>
-        </label>
-        <textarea
-          className="form-input resize-none"
-          rows={4}
-          placeholder="Tuliskan catatan, instruksi, atau disposisi untuk Sekretariat/Admin dan Staff..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          disabled={loading}
-        />
-      </div>
 
       <button
         onClick={submit}
