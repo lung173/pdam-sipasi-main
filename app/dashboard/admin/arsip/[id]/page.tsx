@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { ArrowLeft, FileText, Download, Calendar, User } from "lucide-react";
+import { ArrowLeft, FileText, Download, Calendar, User, Printer } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { AdminArchivePanel } from "@/components/documents/AdminArchivePanel";
@@ -45,6 +45,11 @@ export default async function AdminArsipDetail(props: Params) {
           orderBy: { createdAt: "asc" },
         },
         archive: { include: { archivedBy: { select: { name: true } } } },
+        disposisi: {
+          include: { dari: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
       },
     }),
     prisma.user.findMany({
@@ -57,6 +62,7 @@ export default async function AdminArsipDetail(props: Params) {
   if (!doc) notFound();
 
   const latestDecision = doc.decisions[0];
+  const latestDisposisi = (doc as typeof doc & { disposisi?: { id: string; jabatanKe: string | null; instruksi: string | null; keterangan: string | null; tanggalTandaTangan: Date | null; dari: { name: string } }[] }).disposisi?.[0] ?? null;
   const draftFiles = doc.files.filter((f) => f.fileType === "DRAFT");
   const scanFiles = doc.files.filter((f) => f.fileType === "FINAL_SCAN");
 
@@ -149,8 +155,92 @@ export default async function AdminArsipDetail(props: Params) {
             )}
           </div>
 
+          {/* Lembar Disposisi (tampil setelah Direktur memberikan keputusan) */}
+          {doc.currentStatus === "KEPUTUSAN_DIREKTUR_SELESAI" && (
+            <div className="card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-900">Lembar Disposisi</h3>
+                <Link
+                  href={`/dashboard/admin/arsip/${doc.id}/cetak-disposisi`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak / Download PDF
+                </Link>
+              </div>
+
+              <div className="border-2 border-gray-400 rounded-lg overflow-hidden text-sm bg-white">
+                {/* Header */}
+                <div className="border-b-2 border-gray-400 py-3 px-4 text-center">
+                  <p className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-snug">
+                    PERUSAHAAN UMUM DAERAH AIR MINUM TIRTA MAKMUR KABUPATEN SUKOHARJO
+                  </p>
+                  <p className="text-base font-bold mt-1 tracking-widest text-gray-900">LEMBAR DISPOSISI</p>
+                </div>
+
+                {/* Info rows */}
+                <div className="divide-y divide-gray-300 border-b-2 border-gray-400 text-xs">
+                  <div className="grid grid-cols-2 divide-x divide-gray-300">
+                    <DisposisiRow label="Tanggal Surat" value={format(new Date(doc.tanggalSurat), "dd MMMM yyyy", { locale: localeId })} />
+                    <DisposisiRow label="Tanggal Terima" value={format(new Date(doc.tanggalTerima), "dd MMMM yyyy", { locale: localeId })} />
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-gray-300">
+                    <DisposisiRow label="Asal Surat" value={doc.asalSurat ?? "-"} />
+                    <DisposisiRow label="No. Agenda" value={doc.nomorAgenda ?? "-"} />
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-gray-300">
+                    <DisposisiRow label="Perihal" value={doc.perihal} />
+                    <DisposisiRow label="Nomor Surat" value={doc.nomorSurat} mono />
+                  </div>
+                </div>
+
+                {/* Disposisi Kepada + Tanggal Penyelesaian */}
+                <div className="grid grid-cols-2 divide-x divide-gray-300 border-b-2 border-gray-400 text-xs">
+                  <div className="p-3">
+                    <p className="font-bold text-gray-700 uppercase tracking-wide mb-2">Disposisi Kepada :</p>
+                    <p className="text-gray-900 font-semibold text-sm">
+                      {latestDisposisi?.jabatanKe ?? "-"}
+                    </p>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <div>
+                      <p className="font-bold text-gray-700 uppercase tracking-wide mb-1">Tanggal Penyelesaian :</p>
+                      <p className="text-blue-700 font-medium">
+                        {latestDisposisi?.tanggalTandaTangan
+                          ? format(new Date(latestDisposisi.tanggalTandaTangan), "dd MMMM yyyy", { locale: localeId })
+                          : "-"}
+                      </p>
+                    </div>
+                    {latestDisposisi?.keterangan && (
+                      <div>
+                        <p className="font-bold text-gray-700 uppercase tracking-wide mb-1">Catatan :</p>
+                        <p className="text-blue-700 font-medium whitespace-pre-wrap">{latestDisposisi?.keterangan}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Instruksi */}
+                <div className="p-3 text-xs">
+                  <p className="font-bold text-gray-700 uppercase tracking-wide mb-1.5">Isi Instruksi / Informasi :</p>
+                  <p className="text-blue-700 font-medium whitespace-pre-wrap leading-relaxed">{latestDisposisi?.instruksi ?? "-"}</p>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 flex justify-between text-[10px] text-gray-400">
+                  <span>Dari: {latestDisposisi?.dari?.name ?? "-"}</span>
+                  <span>Status: Dikembalikan ke Agendaris</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Review action */}
-          <AgendarisActionPanel doc={doc} staffUsers={staffUsers} />
+          <AgendarisActionPanel
+            doc={doc}
+            staffUsers={staffUsers}
+            existingDisposisi={latestDisposisi ? { jabatanKe: latestDisposisi.jabatanKe, instruksi: latestDisposisi.instruksi, keterangan: latestDisposisi.keterangan } : null}
+          />
 
           {/* Archive action */}
           {!doc.archive ? (
@@ -216,6 +306,16 @@ function FileRow({ file, highlight }: {
         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
         <Download className="w-4 h-4" />
       </a>
+    </div>
+  );
+}
+
+function DisposisiRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-start gap-1 px-3 py-2">
+      <span className="text-xs font-semibold text-gray-600 shrink-0 w-28">{label}</span>
+      <span className="text-xs text-gray-500 shrink-0">:</span>
+      <span className={`text-xs text-gray-900 ml-1 ${mono ? "font-mono" : ""} truncate`}>{value}</span>
     </div>
   );
 }

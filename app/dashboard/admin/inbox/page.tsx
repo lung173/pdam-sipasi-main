@@ -1,4 +1,4 @@
-﻿// app/dashboard/admin/inbox/page.tsx
+// app/dashboard/admin/inbox/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
@@ -11,7 +11,7 @@ export default async function AdminInboxPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "AGENDARIS") redirect("/dashboard");
 
-  const [inboxDocs, pendingDirectorDocs] = await Promise.all([
+  const [inboxDocs, pendingDirectorDocs, approvedDocs] = await Promise.all([
     prisma.suratMasuk.findMany({
       where: { currentStatus: "MENUNGGU_REVIEW_AGENDARIS" },
       include: { createdBy: { select: { id: true, name: true, divisi: true } } },
@@ -21,6 +21,11 @@ export default async function AdminInboxPage() {
       where: {
         currentStatus: { in: ["MENUNGGU_KEPUTUSAN_DIREKTUR", "DIPROSES_DIREKTUR"] },
       },
+      include: { createdBy: { select: { id: true, name: true, divisi: true } } },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.suratMasuk.findMany({
+      where: { currentStatus: "KEPUTUSAN_DIREKTUR_SELESAI" },
       include: { createdBy: { select: { id: true, name: true, divisi: true } } },
       orderBy: { updatedAt: "desc" },
     }),
@@ -72,6 +77,22 @@ export default async function AdminInboxPage() {
               basePath="/dashboard/admin"
               emptyTitle="Tidak Ada Antrean"
               emptyDesc="Semua dokumen di meja Direktur sudah diputuskan."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="font-semibold text-gray-900 border-l-4 border-green-500 pl-3">
+          Disetujui oleh Direktur
+        </h2>
+        <div className="card">
+          <div className="p-4">
+            <DocumentTable
+              documents={approvedDocs}
+              basePath="/dashboard/admin"
+              emptyTitle="Belum Ada"
+              emptyDesc="Tidak ada dokumen yang baru disetujui Direktur saat ini."
             />
           </div>
         </div>

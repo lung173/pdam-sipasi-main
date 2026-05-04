@@ -1,4 +1,4 @@
-﻿// app/dashboard/admin/review/page.tsx
+// app/dashboard/admin/review/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
@@ -13,7 +13,10 @@ export default async function AdminReviewHistoryPage() {
 
   const documents = await prisma.suratMasuk.findMany({
     where: {
-      reviews: { some: { reviewedById: session.user.id } },
+      OR: [
+        { reviews: { some: { reviewedById: session.user.id } } },
+        { statusTimeline: { some: { changedBy: { id: session.user.id }, fromStatus: "MENUNGGU_REVIEW_AGENDARIS" } } }
+      ]
     },
     include: {
       createdBy: { select: { id: true, name: true, divisi: true } },

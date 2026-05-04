@@ -123,7 +123,7 @@ export function DirectorDecisionPanel({ doc }: { doc: DocProps }) {
       >
         {loading
           ? <><Loader2 className="w-4 h-4 animate-spin" /> Menyimpan Keputusan...</>
-          : "Simpan & Kembalikan ke Admin"}
+          : "Simpan & Kembalikan ke Agendaris"}
       </button>
     </div>
   );

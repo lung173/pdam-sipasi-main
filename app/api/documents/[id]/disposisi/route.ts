@@ -31,12 +31,13 @@ export async function POST(req: NextRequest, props: Params) {
       // ── AGENDARIS: Teruskan dokumen ke Direktur (update metadata saja) ──
       if (user.role === "AGENDARIS") {
         const {
-          nomorSurat, perihal, asalSurat, nomorAgenda, tanggalTerima,
+          nomorSurat, perihal, asalSurat, nomorAgenda, tanggalSurat, tanggalTerima,
         } = body as {
           nomorSurat?: string;
           perihal?: string;
           asalSurat?: string;
           nomorAgenda?: string;
+          tanggalSurat?: string;
           tanggalTerima?: string;
         };
 
@@ -54,10 +55,11 @@ export async function POST(req: NextRequest, props: Params) {
           data: {
             currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR" as never,
             currentHolder: "DIREKTUR",
-            ...(nomorSurat    && { nomorSurat }),
-            ...(perihal       && { perihal }),
-            ...(asalSurat     && { asalSurat }),
-            ...(nomorAgenda   && { nomorAgenda }),
+            ...(nomorSurat && { nomorSurat }),
+            ...(perihal && { perihal }),
+            ...(asalSurat && { asalSurat }),
+            ...(nomorAgenda && { nomorAgenda }),
+            ...(tanggalSurat && { tanggalSurat: new Date(tanggalSurat) }),
             ...(tanggalTerima && { tanggalTerima: new Date(tanggalTerima) }),
           },
         });
@@ -131,7 +133,7 @@ export async function POST(req: NextRequest, props: Params) {
             keterangan,
             tanggalTandaTangan: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
             dariId: user.id,
-          },
+          } as any,
         });
       } else {
         disposisi = await prisma.lembarDisposisi.create({
@@ -142,7 +144,7 @@ export async function POST(req: NextRequest, props: Params) {
             instruksi,
             keterangan,
             tanggalTandaTangan: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
-          },
+          } as any,
         });
       }
 

@@ -33,9 +33,15 @@ const WAKTU_OPTIONS: { value: WaktuKirim; label: string }[] = [
 export function AgendarisActionPanel({
   doc,
   staffUsers = [],
+  existingDisposisi = null,
 }: {
   doc: DocProps;
   staffUsers?: StaffUser[];
+  existingDisposisi?: {
+    jabatanKe: string | null;
+    instruksi: string | null;
+    keterangan: string | null;
+  } | null;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -57,6 +63,7 @@ export function AgendarisActionPanel({
     d ? new Date(d as string).toISOString().split("T")[0] : "";
   const [editNomorSurat, setEditNomorSurat] = useState(doc.nomorSurat ?? "");
   const [editPerihal, setEditPerihal] = useState(doc.perihal ?? "");
+  const [editTanggalSurat, setEditTanggalSurat] = useState(toDateInput(doc.tanggalSurat));
   const [editTanggalTerima, setEditTanggalTerima] = useState(toDateInput(doc.tanggalTerima));
   const [editAsalSurat, setEditAsalSurat] = useState(doc.asalSurat ?? "");
   const [editNomorAgenda, setEditNomorAgenda] = useState(doc.nomorAgenda ?? "");
@@ -67,6 +74,7 @@ export function AgendarisActionPanel({
     setWaktu("LANGSUNG"); setIsUrgen(false);
     setEditNomorSurat(doc.nomorSurat ?? "");
     setEditPerihal(doc.perihal ?? "");
+    setEditTanggalSurat(toDateInput(doc.tanggalSurat));
     setEditTanggalTerima(toDateInput(doc.tanggalTerima));
     setEditAsalSurat(doc.asalSurat ?? "");
     setEditNomorAgenda(doc.nomorAgenda ?? "");
@@ -125,6 +133,7 @@ export function AgendarisActionPanel({
           perihal: editPerihal || undefined,
           asalSurat: editAsalSurat || undefined,
           nomorAgenda: editNomorAgenda || undefined,
+          tanggalSurat: editTanggalSurat || undefined,
           tanggalTerima: editTanggalTerima || undefined,
         }),
       });
@@ -272,9 +281,16 @@ export function AgendarisActionPanel({
 
               {/* Info rows: Tanggal Surat (static) + editable fields */}
               <div className="divide-y divide-gray-300 border-b-2 border-gray-400">
-                {/* Row 1: Tanggal Surat (read-only) | Tanggal Terima (editable) */}
+                {/* Row 1: Tanggal Surat (editable) | Tanggal Terima (editable) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
-                  <FormInfoRow label="Tanggal Surat" value={fmtDate(doc.tanggalSurat)} />
+                  <FormEditRow label="Tanggal Surat">
+                    <input
+                      type="date"
+                      className="form-input text-xs py-1"
+                      value={editTanggalSurat}
+                      onChange={(e) => setEditTanggalSurat(e.target.value)}
+                    />
+                  </FormEditRow>
                   <FormEditRow label="Tanggal Terima">
                     <input
                       type="date"
@@ -366,9 +382,15 @@ export function AgendarisActionPanel({
                     <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
                       Catatan :
                     </p>
-                    <div className="form-input resize-none text-xs bg-gray-50 text-gray-400 cursor-not-allowed border-dashed h-16 flex items-start pt-1">
-                      Diisi oleh Direktur
-                    </div>
+                    {existingDisposisi?.keterangan ? (
+                      <div className="form-input resize-none text-xs bg-blue-50 text-blue-800 border-blue-300 min-h-[4rem] flex items-start pt-1 whitespace-pre-wrap">
+                        {existingDisposisi.keterangan}
+                      </div>
+                    ) : (
+                      <div className="form-input resize-none text-xs bg-gray-50 text-gray-400 cursor-not-allowed border-dashed h-16 flex items-start pt-1">
+                        Diisi oleh Direktur
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -378,16 +400,26 @@ export function AgendarisActionPanel({
                 <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
                   Isi Instruksi / Informasi :
                 </p>
-                <div className="form-input resize-none bg-gray-50 text-gray-400 cursor-not-allowed border-dashed min-h-[4rem] flex items-start pt-1 text-xs">
-                  Diisi oleh Direktur
-                </div>
+                {existingDisposisi?.instruksi ? (
+                  <div className="form-input resize-none bg-blue-50 text-blue-800 border-blue-300 min-h-[4rem] flex items-start pt-1 text-xs whitespace-pre-wrap">
+                    {existingDisposisi.instruksi}
+                  </div>
+                ) : (
+                  <div className="form-input resize-none bg-gray-50 text-gray-400 cursor-not-allowed border-dashed min-h-[4rem] flex items-start pt-1 text-xs">
+                    Diisi oleh Direktur
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Info banner */}
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800">
               <span className="shrink-0 mt-0.5">ℹ️</span>
-              <span>Setelah diteruskan, <strong>Direktur</strong> akan mengisi Disposisi Kepada, Instruksi, Catatan, dan Tanggal Penyelesaian.</span>
+              {existingDisposisi?.instruksi ? (
+                <span>Direktur telah mengisi lembar disposisi. Teruskan dokumen ke Direktur untuk konfirmasi keputusan.</span>
+              ) : (
+                <span>Setelah diteruskan, <strong>Direktur</strong> akan mengisi Disposisi Kepada, Instruksi, Catatan, dan Tanggal Penyelesaian.</span>
+              )}
             </div>
 
             {/* Action buttons */}
