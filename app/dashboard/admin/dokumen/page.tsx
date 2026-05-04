@@ -1,17 +1,48 @@
-﻿// app/dashboard/admin/dokumen/page.tsx
+// app/dashboard/admin/dokumen/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DocumentTable } from "@/components/documents/DocumentTable";
+import { DokumenSearch } from "@/components/documents/DokumenSearch";
 import { ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 
-export default async function AdminSemuaDokumenPage() {
+type Params = { searchParams: Promise<{ q?: string; date?: string }> };
+
+export default async function AdminSemuaDokumenPage(props: Params) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "AGENDARIS") redirect("/dashboard");
 
+  const searchParams = await props.searchParams;
+  const q = searchParams.q ?? "";
+  const date = searchParams.date ?? "";
+
+  const where: Prisma.SuratMasukWhereInput = {};
+
+  if (q) {
+    where.OR = [
+      { perihal: { contains: q, mode: "insensitive" } },
+      { asalSurat: { contains: q, mode: "insensitive" } },
+      { nomorSurat: { contains: q, mode: "insensitive" } },
+      { createdBy: { name: { contains: q, mode: "insensitive" } } },
+    ];
+  }
+
+  if (date) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    where.tanggalSurat = {
+      gte: startOfDay,
+      lte: endOfDay,
+    };
+  }
+
   const documents = await prisma.suratMasuk.findMany({
+    where,
     include: {
       createdBy: { select: { id: true, name: true, divisi: true } },
     },
@@ -37,14 +68,16 @@ export default async function AdminSemuaDokumenPage() {
         </div>
       </div>
 
+      <DokumenSearch />
+
       <div className="card">
         <div className="p-4">
           <DocumentTable
             documents={documents}
-            basePath="/dashboard/admin" // Assuming detail url is /dashboard/admin/dokumen/[id] or wait! Admin detail is /dashboard/admin/arsip/[id] usually?
+            basePath="/dashboard/admin/arsip"
             showCreator={true}
-            emptyTitle="Tidak ada data"
-            emptyDesc="Sistem belum memiliki dokumen satupun."
+            emptyTitle={q || date ? "Pencarian tidak ditemukan" : "Tidak ada data"}
+            emptyDesc={q || date ? "Tidak ada dokumen yang sesuai dengan kata kunci atau tanggal pencarian." : "Sistem belum memiliki dokumen satupun."}
           />
         </div>
       </div>
