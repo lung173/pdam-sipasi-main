@@ -91,7 +91,7 @@ export interface TimelineItem {
   id: string;
   fromStatus: DocumentStatus | null;
   toStatus: DocumentStatus;
-  changedBy: string; // Changed back to just string or object
+  changedBy: { name: string };
   notes: string | null;
   createdAt: Date | string;
 }
@@ -115,13 +115,15 @@ export interface JadwalItem {
 
 export interface DisposisiItem {
   id: string;
+  jabatanKe: string | null;
   instruksi: string | null;
   keterangan: string | null;
   tempat: string | null;
   tanggalTandaTangan: Date | string | null;
   parafDariId: string | null;
   dari: { name: string };
-  ke: { name: string };
+  ke: { name: string } | null;
+  createdAt: Date | string;
 }
 
 export interface UndanganItem {
@@ -219,7 +221,7 @@ export const STATUS_COLORS: Record<DocumentStatus, string> = {
 };
 
 export const DECISION_LABELS: Record<DecisionType, string> = {
-  DISETUJUI: "Disetujui",
+  DISETUJUI: "Disetujui — Dikembalikan ke Agendaris",
   DITOLAK: "Ditolak",
   REVISI: "Perlu Revisi",
   DISPOSISI: "Disposisi",

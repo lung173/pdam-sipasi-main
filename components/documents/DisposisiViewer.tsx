@@ -7,11 +7,12 @@ import { GitBranch } from "lucide-react";
 
 interface DisposisiData {
   id: string;
+  jabatanKe: string | null;
   instruksi: string | null;
   keterangan: string | null;
   tanggalTandaTangan: Date | string | null;
   dari: { name: string };
-  ke: { name: string };
+  ke: { name: string } | null;
   createdAt: Date | string;
 }
 
@@ -77,7 +78,7 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
               Disposisi Kepada :
             </p>
             <p className="text-xs text-gray-900 px-2 py-1.5 bg-blue-50 ring-1 ring-blue-400 rounded">
-              {disposisi.ke.name}
+              {disposisi.jabatanKe ?? disposisi.ke?.name ?? "-"}
             </p>
           </div>
 

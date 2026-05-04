@@ -10,6 +10,7 @@ import { ArrowLeft, FileText, Download, Calendar, User, Building } from "lucide-
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { DirectorDecisionPanel } from "@/components/documents/DirectorDecisionPanel";
+import { DirectorDisposisiPanel } from "@/components/documents/DirectorDisposisiPanel";
 import { DECISION_LABELS } from "@/types";
 import { DecisionType } from "@prisma/client";
 
@@ -38,7 +39,14 @@ export default async function DirektuurDocumentDetail(props: Params) {
         orderBy: { decidedAt: "desc" },
         take: 3,
       },
-      statusTimeline: { orderBy: { createdAt: "asc" } },
+      statusTimeline: {
+        include: { changedBy: { select: { name: true } } },
+        orderBy: { createdAt: "asc" },
+      },
+      disposisi: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
   });
 
@@ -56,6 +64,7 @@ export default async function DirektuurDocumentDetail(props: Params) {
 
   // Direktur hanya bisa proses dokumen yang menunggu keputusannya
   const canDecide = ["MENUNGGU_KEPUTUSAN_DIREKTUR", "DIPROSES_DIREKTUR"].includes(doc.currentStatus);
+  const latestDisposisi = (doc as typeof doc & { disposisi?: { id: string; jabatanKe: string | null; instruksi: string | null; keterangan: string | null; tanggalTandaTangan: Date | null }[] }).disposisi?.[0] ?? null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -131,6 +140,14 @@ export default async function DirektuurDocumentDetail(props: Params) {
               </div>
             )}
           </div>
+
+          {/* Lembar Disposisi Panel — Direktur isi Disposisi Kepada + Instruksi */}
+          {canDecide && (
+            <DirectorDisposisiPanel
+              docId={doc.id}
+              existingDisposisi={latestDisposisi}
+            />
+          )}
 
           {/* Decision panel */}
           {canDecide && <DirectorDecisionPanel doc={doc} />}

@@ -3,17 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { CheckCircle, XCircle, RotateCcw, GitBranch, Loader2 } from "lucide-react";
+import { CheckCircle, RotateCcw, Loader2 } from "lucide-react";
 import { DecisionType } from "@prisma/client";
 import { DECISION_LABELS } from "@/types";
 
 interface DocProps { id: string; currentStatus: string; }
 
 const DECISION_OPTIONS: { type: DecisionType; label: string; icon: React.ElementType; cls: string }[] = [
-  { type: "DISETUJUI",  label: "Setujui",    icon: CheckCircle, cls: "btn-success" },
-  { type: "DITOLAK",    label: "Tolak",       icon: XCircle,     cls: "btn-danger" },
-  { type: "REVISI",     label: "Minta Revisi",icon: RotateCcw,   cls: "bg-yellow-600 hover:bg-yellow-700 text-white inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 transition-colors" },
-  { type: "DISPOSISI",  label: "Disposisi",   icon: GitBranch,   cls: "btn-secondary" },
+  { type: "DISETUJUI", label: "Disetujui — Kembalikan ke Agendaris", icon: CheckCircle, cls: "btn-success" },
+  { type: "REVISI",    label: "Minta Revisi",                         icon: RotateCcw,   cls: "bg-yellow-600 hover:bg-yellow-700 text-white inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 transition-colors" },
 ];
 
 export function DirectorDecisionPanel({ doc }: { doc: DocProps }) {

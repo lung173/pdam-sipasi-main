@@ -49,11 +49,8 @@ export function AgendarisActionPanel({
   // Kembalikan state
   const [revisiNote, setRevisiNote] = useState("");
 
-  // Disposisi state
-  const [keId, setKeId] = useState("");
-  const [instruksi, setInstruksi] = useState("");
-  const [keterangan, setKeterangan] = useState("");
-  const [tanggalPenyelesaian, setTanggalPenyelesaian] = useState("");
+  // Disposisi state — dihapus (Agendaris tidak mengisi disposisi kepada/instruksi)
+  // Hanya meneruskan dokumen ke Direktur
 
   // Editable document fields (Agendaris dapat mengoreksi saat buat disposisi)
   const toDateInput = (d?: Date | string) =>
@@ -67,7 +64,6 @@ export function AgendarisActionPanel({
   const reset = () => {
     setMode("idle");
     setReviewNote(""); setRevisiNote("");
-    setKeId(""); setInstruksi(""); setKeterangan(""); setTanggalPenyelesaian("");
     setWaktu("LANGSUNG"); setIsUrgen(false);
     setEditNomorSurat(doc.nomorSurat ?? "");
     setEditPerihal(doc.perihal ?? "");
@@ -118,17 +114,13 @@ export function AgendarisActionPanel({
   };
 
   const submitDisposisi = async () => {
-    if (!keId) { toast.error("Pilih penerima disposisi."); return; }
-    if (!instruksi.trim()) { toast.error("Instruksi disposisi wajib diisi."); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/documents/${doc.id}/disposisi`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          keId, instruksi, keterangan,
-          tanggalPenyelesaian: tanggalPenyelesaian || undefined,
-          // Document field corrections
+          // Hanya metadata dokumen — disposisi kepada + instruksi diisi oleh Direktur
           nomorSurat: editNomorSurat || undefined,
           perihal: editPerihal || undefined,
           asalSurat: editAsalSurat || undefined,
@@ -138,7 +130,7 @@ export function AgendarisActionPanel({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Gagal.");
-      toast.success(json.message ?? "Disposisi berhasil dibuat!");
+      toast.success(json.message ?? "Dokumen diteruskan ke Direktur!");
       router.push("/dashboard/admin/inbox");
       router.refresh();
     } catch (err: unknown) {
@@ -333,87 +325,69 @@ export function AgendarisActionPanel({
                 </div>
               </div>
 
-              {/* Disposisi Kepada + Tanggal Penyelesaian & Catatan */}
+              {/* Disposisi Kepada + Tanggal Penyelesaian & Catatan — READ-ONLY untuk Agendaris */}
               <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300 border-b-2 border-gray-400">
-                {/* Left: Disposisi Kepada */}
+                {/* Left: Disposisi Kepada — diisi Direktur */}
                 <div className="p-3">
                   <p className="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wide">
                     Disposisi Kepada :
                   </p>
-                  {staffUsers.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">Tidak ada penerima tersedia.</p>
-                  ) : (
-                    <div className="space-y-1">
-                      {staffUsers.map((u, i) => (
-                        <label
-                          key={u.id}
-                          className={`flex items-start gap-2.5 px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                            keId === u.id
-                              ? "bg-blue-50 ring-1 ring-blue-400"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="disposisi-ke"
-                            value={u.id}
-                            checked={keId === u.id}
-                            onChange={() => setKeId(u.id)}
-                            className="accent-blue-600 mt-0.5 shrink-0"
-                          />
-                          <span className="text-xs text-gray-800">
-                            {i + 1}.&nbsp;{u.name}
-                            {u.divisi && (
-                              <span className="text-gray-400 ml-1">({u.divisi})</span>
-                            )}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2.5 space-y-1">
+                    {[
+                      "Kabag Admin dan Keu",
+                      "Kabag Teknik",
+                      "Kabag Hublang",
+                      "Kepala SPI",
+                      "Kacab. Utara",
+                      "Kacab. Selatan",
+                    ].map((j, i) => (
+                      <div key={j} className="flex items-center gap-2 opacity-40 cursor-not-allowed">
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-400 shrink-0" />
+                        <span className="text-xs text-gray-600">{i + 1}. {j}</span>
+                      </div>
+                    ))}
+                    <p className="text-[10px] text-blue-500 mt-1.5 italic font-medium">
+                      ✦ Diisi oleh Direktur
+                    </p>
+                  </div>
                 </div>
 
-                {/* Right: Tanggal Penyelesaian + Catatan */}
+                {/* Right: Tanggal Penyelesaian + Catatan — read-only */}
                 <div className="p-3 space-y-3">
                   <div>
                     <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
                       Tanggal Penyelesaian :
                     </p>
-                    <input
-                      type="date"
-                      className="form-input text-xs"
-                      value={tanggalPenyelesaian}
-                      onChange={(e) => setTanggalPenyelesaian(e.target.value)}
-                    />
+                    <div className="form-input text-xs bg-gray-50 text-gray-400 cursor-not-allowed border-dashed">
+                      Diisi oleh Direktur
+                    </div>
                   </div>
                   <div>
                     <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
                       Catatan :
                     </p>
-                    <textarea
-                      className="form-input resize-none text-xs"
-                      rows={4}
-                      placeholder="Catatan tambahan..."
-                      value={keterangan}
-                      onChange={(e) => setKeterangan(e.target.value)}
-                    />
+                    <div className="form-input resize-none text-xs bg-gray-50 text-gray-400 cursor-not-allowed border-dashed h-16 flex items-start pt-1">
+                      Diisi oleh Direktur
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Instruksi / Informasi */}
+              {/* Instruksi / Informasi — read-only untuk Agendaris */}
               <div className="p-3">
                 <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
-                  Isi Instruksi / Informasi <span className="text-red-500">*</span> :
+                  Isi Instruksi / Informasi :
                 </p>
-                <textarea
-                  className="form-input resize-none"
-                  rows={3}
-                  placeholder="Tuliskan instruksi yang harus dilaksanakan..."
-                  value={instruksi}
-                  onChange={(e) => setInstruksi(e.target.value)}
-                />
+                <div className="form-input resize-none bg-gray-50 text-gray-400 cursor-not-allowed border-dashed min-h-[4rem] flex items-start pt-1 text-xs">
+                  Diisi oleh Direktur
+                </div>
               </div>
+            </div>
+
+            {/* Info banner */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-800">
+              <span className="shrink-0 mt-0.5">ℹ️</span>
+              <span>Setelah diteruskan, <strong>Direktur</strong> akan mengisi Disposisi Kepada, Instruksi, Catatan, dan Tanggal Penyelesaian.</span>
             </div>
 
             {/* Action buttons */}
@@ -426,7 +400,7 @@ export function AgendarisActionPanel({
               >
                 {loading
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...</>
-                  : <><GitBranch className="w-4 h-4" /> Buat &amp; Teruskan ke Direktur</>
+                  : <><Send className="w-4 h-4" /> Teruskan ke Direktur</>
                 }
               </button>
             </div>

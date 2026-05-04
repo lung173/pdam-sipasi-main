@@ -40,7 +40,10 @@ export default async function AdminArsipDetail(props: Params) {
           orderBy: { decidedAt: "desc" },
           take: 1,
         },
-        statusTimeline: { orderBy: { createdAt: "asc" } },
+        statusTimeline: {
+          include: { changedBy: { select: { name: true } } },
+          orderBy: { createdAt: "asc" },
+        },
         archive: { include: { archivedBy: { select: { name: true } } } },
       },
     }),

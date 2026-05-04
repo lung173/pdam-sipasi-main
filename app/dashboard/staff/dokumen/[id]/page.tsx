@@ -48,7 +48,10 @@ export default async function StaffDocumentDetail(props: Params) {
         orderBy: { createdAt: "desc" },
         take: 1,
       },
-      statusTimeline: { orderBy: { createdAt: "asc" } },
+      statusTimeline: {
+        include: { changedBy: { select: { name: true } } },
+        orderBy: { createdAt: "asc" },
+      },
       archive: { include: { archivedBy: { select: { name: true } } } },
     },
   });

@@ -240,10 +240,11 @@ model DirectorDecision {
 model LembarDisposisi {
   id           String   @id @default(cuid())
   suratMasukId String   @map("surat_masuk_id")
-  dariId       String   @map("dari_id")   // direktur
-  keId         String   @map("ke_id")     // admin_staff
-  instruksi    String?
-  keterangan   String?  // Bisa diisi direktur
+  dariId       String   @map("dari_id")   // agendaris/direktur yang membuat
+  keId         String?  @map("ke_id")     // opsional — user penerima (jika ada)
+  jabatanKe    String?  @map("jabatan_ke") // label jabatan penerima (diisi Direktur)
+  instruksi    String?  // diisi Direktur
+  keterangan   String?  // catatan tambahan
   
   // Data for Barcode
   tempat             String?  @map("tempat")
@@ -255,7 +256,7 @@ model LembarDisposisi {
 
   suratMasuk SuratMasuk @relation(fields: [suratMasukId], references: [id], onDelete: Cascade)
   dari       User       @relation("DisposisiDari", fields: [dariId], references: [id])
-  ke         User       @relation("DisposisiKe", fields: [keId], references: [id])
+  ke         User?      @relation("DisposisiKe", fields: [keId], references: [id])
 
   @@index([suratMasukId])
   @@map("lembar_disposisi")
