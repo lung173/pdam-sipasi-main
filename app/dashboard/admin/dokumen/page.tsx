@@ -5,11 +5,15 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { DokumenSearch } from "@/components/documents/DokumenSearch";
+import { Pagination } from "@/components/ui/Pagination";
 import { ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
+import { Suspense } from "react";
 
-type Params = { searchParams: Promise<{ q?: string; date?: string }> };
+const PAGE_SIZE = 10;
+
+type Params = { searchParams: Promise<{ q?: string; date?: string; page?: string }> };
 
 export default async function AdminSemuaDokumenPage(props: Params) {
   const session = await getServerSession(authOptions);
@@ -18,6 +22,7 @@ export default async function AdminSemuaDokumenPage(props: Params) {
   const searchParams = await props.searchParams;
   const q = searchParams.q ?? "";
   const date = searchParams.date ?? "";
+  const page = Math.max(1, parseInt(searchParams.page ?? "1") || 1);
 
   const where: Prisma.SuratMasukWhereInput = {};
 
@@ -41,13 +46,20 @@ export default async function AdminSemuaDokumenPage(props: Params) {
     };
   }
 
-  const documents = await prisma.suratMasuk.findMany({
-    where,
-    include: {
-      createdBy: { select: { id: true, name: true, divisi: true } },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+  const [totalItems, documents] = await Promise.all([
+    prisma.suratMasuk.count({ where }),
+    prisma.suratMasuk.findMany({
+      where,
+      include: {
+        createdBy: { select: { id: true, name: true, divisi: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -71,7 +83,7 @@ export default async function AdminSemuaDokumenPage(props: Params) {
       <DokumenSearch />
 
       <div className="card">
-        <div className="p-4">
+        <div className="p-4 space-y-4">
           <DocumentTable
             documents={documents}
             basePath="/dashboard/admin/arsip"
@@ -79,6 +91,14 @@ export default async function AdminSemuaDokumenPage(props: Params) {
             emptyTitle={q || date ? "Pencarian tidak ditemukan" : "Tidak ada data"}
             emptyDesc={q || date ? "Tidak ada dokumen yang sesuai dengan kata kunci atau tanggal pencarian." : "Sistem belum memiliki dokumen satupun."}
           />
+          <Suspense>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={PAGE_SIZE}
+            />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -14,13 +14,15 @@ export function DokumenSearch() {
   const handleSearch = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
     const sp = new URLSearchParams(params.toString());
-    
+
     if (q) sp.set("q", q);
     else sp.delete("q");
-    
+
     if (date) sp.set("date", date);
     else sp.delete("date");
-    
+
+    sp.delete("page");
+
     router.push(`?${sp.toString()}`);
   }, [q, date, params, router]);
 
