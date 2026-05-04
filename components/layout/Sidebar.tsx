@@ -70,29 +70,29 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
   return (
     <aside
       className={cn(
-        "print:hidden",
-        "w-64 bg-blue-900 text-white flex flex-col shrink-0 z-30 transition-transform duration-300",
-        /* Desktop: always visible */
-        "md:relative md:translate-x-0",
-        /* Mobile: fixed overlay, shown/hidden via isOpen */
-        "fixed inset-y-0 left-0",
+        "print:hidden group",
+        "bg-blue-900 text-white flex flex-col shrink-0 z-40 transition-[width,transform] duration-300 ease-in-out",
+        /* Desktop: collapsable */
+        "md:relative md:translate-x-0 md:w-20 md:hover:w-64",
+        /* Mobile: fixed overlay */
+        "fixed inset-y-0 left-0 w-64",
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}
     >
       {/* Logo + close button */}
-      <div className="px-5 py-5 border-b border-blue-800">
-        <div className="flex items-center gap-3">
+      <div className="px-5 py-5 border-b border-blue-800 flex items-center h-[76px] box-border overflow-hidden">
+        <div className="flex items-center gap-3 w-full">
           <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-            <FileText className="w-5 h-5" />
+            <FileText className="w-5 h-5 shrink-0" />
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-sm leading-tight">SIPAS PDAM</p>
-            <p className="text-xs text-blue-300 leading-tight">Arsip Digital</p>
+          <div className="flex-1 min-w-[140px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+            <p className="font-bold text-sm leading-tight truncate">SIPAS PDAM</p>
+            <p className="text-xs text-blue-300 leading-tight truncate">Arsip Digital</p>
           </div>
           {/* Close button - mobile only */}
           <button
             onClick={onClose}
-            className="md:hidden p-1 rounded-lg hover:bg-blue-800 text-blue-300 hover:text-white transition-colors"
+            className="md:hidden p-1 rounded-lg hover:bg-blue-800 text-blue-300 hover:text-white transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -100,16 +100,23 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
       </div>
 
       {/* User info */}
-      <div className="px-5 py-4 border-b border-blue-800">
-        <p className="text-xs text-blue-400 mb-1">Login sebagai</p>
-        <p className="font-semibold text-sm leading-tight truncate">{userName}</p>
-        <span className="inline-block mt-1 text-xs bg-blue-700 px-2 py-0.5 rounded-full text-blue-100">
-          {roleLabel[role]}
-        </span>
+      <div className="px-5 py-4 border-b border-blue-800 flex items-center h-[90px] box-border relative overflow-hidden">
+         {/* Collapsed Avatar (Desktop only) */}
+         <div className="hidden md:flex group-hover:md:hidden absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-blue-800 rounded-full items-center justify-center shrink-0">
+            <span className="font-bold text-sm">{userName.charAt(0).toUpperCase()}</span>
+         </div>
+         {/* Full User Info */}
+         <div className="flex-1 min-w-[180px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+          <p className="text-xs text-blue-400 mb-1">Login sebagai</p>
+          <p className="font-semibold text-sm leading-tight truncate">{userName}</p>
+          <span className="inline-block mt-1 text-xs bg-blue-700 px-2 py-0.5 rounded-full text-blue-100 truncate">
+            {roleLabel[role]}
+          </span>
+         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = item.href === activeHref;
@@ -119,20 +126,22 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors relative",
                 active
                   ? "bg-blue-700 text-white font-medium"
                   : "text-blue-200 hover:bg-blue-800 hover:text-white"
               )}
+              title={item.label}
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              {item.label}
+              <Icon className="w-5 h-5 shrink-0" />
+              <span className="whitespace-nowrap transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+                {item.label}
+              </span>
             </Link>
           );
         })}
       </nav>
-
-
     </aside>
   );
 }
+
