@@ -29,7 +29,7 @@ export default function Home() {
       {/* Main Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 w-full max-w-6xl mx-auto mt-12 mb-24">
         <div className="text-center max-w-3xl glass-panel p-10 md:p-16 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-50/80 border border-cyan-100 text-cyan-700 font-medium text-sm mb-6 animate-float">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-50/80 border border-cyan-100 text-cyan-700 font-medium text-base mb-6 animate-float">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
             Sistem Informasi Pengelolaan Alur Surat
           </div>
@@ -65,7 +65,7 @@ export default function Home() {
                 {feat.icon}
               </div>
               <h3 className="text-lg font-bold text-slate-800 mb-2">{feat.title}</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
+              <p className="text-base text-slate-500 leading-relaxed">{feat.desc}</p>
             </div>
           ))}
         </div>
@@ -73,7 +73,7 @@ export default function Home() {
       
       {/* Footer */}
       <footer className="py-6 text-center border-t border-slate-200/50 bg-white/50 backdrop-blur-sm z-10 relative">
-        <p className="text-sm text-slate-400 font-medium tracking-wide">
+        <p className="text-base text-slate-400 font-medium tracking-wide">
           &copy; {new Date().getFullYear()} SIPAS PDAM. Hak Cipta Dilindungi.
         </p>
       </footer>

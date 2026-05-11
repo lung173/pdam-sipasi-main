@@ -80,7 +80,7 @@ export async function POST(req: NextRequest, props: Params) {
         });
 
         await createStatusTimeline({
-          documentId: doc.id,
+          suratMasukId: doc.id,
           fromStatus: prevStatus,
           toStatus: "MENUNGGU_ARSIP_ADMIN",
           changedBy: user.id,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: `FILE_UPLOADED_${fileType}`,
         description: `File ${fileType} diupload: ${file.name}`,
         metadata: { fileName: file.name, fileSize: file.size, mimeType: file.type },

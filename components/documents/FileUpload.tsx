@@ -1,3 +1,9 @@
+/**
+ * @file components/documents/FileUpload.tsx
+ * @description Komponen UI untuk menangani unggahan file dokumen.
+ * Mendukung drag-and-drop, validasi sisi client, dan progres unggahan 
+ * untuk file draft maupun scan final.
+ */
 // components/documents/FileUpload.tsx
 "use client";
 import { useState, useRef, DragEvent } from "react";

@@ -1,10 +1,14 @@
+/**
+ * @file components/documents/StatusTimeline.tsx
+ * @description Komponen UI untuk menampilkan riwayat status dokumen secara vertikal.
+ * Memberikan visualisasi urutan proses yang telah dilalui dokumen beserta catatan dari setiap tahap.
+ */
 // components/documents/StatusTimeline.tsx
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { CheckCircle2, Circle } from "lucide-react";
-import { TimelineItem } from "@/types";
-import { STATUS_LABELS } from "@/types";
 import { DocumentStatus } from "@prisma/client";
+import { ArrowDownLeft, ArrowUpRight, Loader2, CheckCircle2 } from "lucide-react";
+import { TimelineItem, STATUS_LABELS } from "@/types";
 
 interface Props {
   timeline: TimelineItem[];
@@ -22,34 +26,43 @@ export function StatusTimeline({ timeline }: Props) {
         return (
           <li key={item.id} className="ml-6 pb-6 last:pb-0">
             <span
-              className={`absolute -left-[11px] flex items-center justify-center w-5 h-5 rounded-full ring-2 ring-white ${
-                isLast ? "bg-blue-600" : "bg-green-500"
+              className={`absolute -left-[13px] flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white shadow-sm ${
+                isLast ? "bg-blue-600 animate-pulse" : "bg-gray-100"
               }`}
             >
               {isLast ? (
-                <Circle className="w-2.5 h-2.5 text-white fill-white" />
+                <Loader2 className="w-3 h-3 text-white animate-spin" />
+              ) : item.toStatus.includes("MENUNGGU") ? (
+                <ArrowDownLeft className="w-3 h-3 text-orange-500" />
+              ) : item.toStatus.includes("SELESAI") || item.toStatus.includes("ARSIP") ? (
+                <CheckCircle2 className="w-3 h-3 text-green-500" />
               ) : (
-                <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                <ArrowUpRight className="w-3 h-3 text-blue-500" />
               )}
             </span>
 
             <div className="pt-0.5">
-              <p className="text-sm font-semibold text-gray-900">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                  item.toStatus.includes("MENUNGGU") ? "bg-orange-100 text-orange-700" :
+                  item.toStatus.includes("ARSIP") || item.toStatus.includes("SELESAI") ? "bg-green-100 text-green-700" :
+                  "bg-blue-100 text-blue-700"
+                }`}>
+                  {item.toStatus.includes("MENUNGGU") ? "Masuk" : 
+                   item.toStatus.includes("ARSIP") || item.toStatus.includes("SELESAI") ? "Selesai" : "Keluar / Proses"}
+                </span>
+                <time className="text-[10px] text-gray-400">
+                  {format(new Date(item.createdAt), "dd MMM yyyy, HH:mm", { locale: localeId })}
+                </time>
+              </div>
+              <p className="text-sm font-bold text-gray-900 leading-tight">
                 {STATUS_LABELS[item.toStatus as DocumentStatus] ?? item.toStatus}
               </p>
-              {item.fromStatus && (
-                <p className="text-xs text-gray-400">
-                  dari: {STATUS_LABELS[item.fromStatus as DocumentStatus] ?? item.fromStatus}
-                </p>
-              )}
               {item.notes && (
-                <p className="text-xs text-gray-600 mt-1 bg-gray-50 px-2 py-1 rounded">
-                  {item.notes}
+                <p className="text-xs text-gray-600 mt-1.5 bg-gray-50 border border-gray-100 px-2 py-1.5 rounded-lg italic">
+                  &ldquo;{item.notes}&rdquo;
                 </p>
               )}
-              <time className="text-xs text-gray-400 mt-1 block">
-                {format(new Date(item.createdAt), "dd MMM yyyy, HH:mm", { locale: localeId })}
-              </time>
             </div>
           </li>
         );

@@ -1,3 +1,9 @@
+/**
+ * @file prisma/schema.prisma
+ * @description Definisi model database (Schema) untuk sistem SIPASI.
+ * Mendefinisikan tabel Users, SuratMasuk, DocumentFile, AuditLog, 
+ * dan relasi antar entitas yang digunakan oleh Prisma ORM.
+ */
 // prisma/schema.prisma
 
 generator client {
@@ -63,6 +69,15 @@ enum UndanganMedia {
   OFFLINE
 }
 
+enum DocumentCategory {
+  UNDANGAN
+  PEMBELIAN
+  KERJASAMA
+  KEPEGAWAIAN
+  KEUANGAN
+  DLL
+}
+
 // ─────────────────────────────────────────────
 //  USERS
 // ─────────────────────────────────────────────
@@ -75,6 +90,8 @@ model User {
   role         UserRole
   divisi       String?
   bagian       String?
+  title        String?  // Gelar (mis: S.T., M.Kom.)
+  image        String?  // Path ke foto profil
   isActive     Boolean  @default(true) @map("is_active")
   
   // Tanda tangan & paraf (base64 atau path ke file gambar)
@@ -117,8 +134,9 @@ model SuratMasuk {
   tanggalSurat    DateTime       @map("tanggal_surat")
   tanggalTerima   DateTime       @default(now()) @map("tanggal_terima")
   currentStatus   DocumentStatus @default(DRAFT) @map("current_status")
-  currentHolder   String?        @map("current_holder")
-  isVisible       Boolean        @default(true) @map("is_visible")
+  currentHolder   String?          @map("current_holder")
+  category        DocumentCategory @default(DLL)
+  isVisible       Boolean          @default(true) @map("is_visible")
   createdById     String         @map("created_by")
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")

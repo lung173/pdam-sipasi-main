@@ -37,10 +37,14 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Semua Dokumen",      href: "/dashboard/direktur/dokumen",  icon: BookOpen        },
   ],
   KABAG: [
-    { label: "Semua Dokumen",   href: "/dashboard/direktur/dokumen", icon: BookOpen        },
+    { label: "Dashboard",       href: "/dashboard/kabag",         icon: LayoutDashboard },
+    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList   },
+    { label: "Semua Dokumen",   href: "/dashboard/kabag/dokumen",   icon: BookOpen        },
   ],
   KASUBAG: [
-    { label: "Semua Dokumen",   href: "/dashboard/direktur/dokumen", icon: BookOpen        },
+    { label: "Dashboard",       href: "/dashboard/kabag",         icon: LayoutDashboard },
+    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList   },
+    { label: "Semua Dokumen",   href: "/dashboard/kabag/dokumen",   icon: BookOpen        },
   ],
 };
 
@@ -86,8 +90,8 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
             <FileText className="w-5 h-5 shrink-0" />
           </div>
           <div className="flex-1 min-w-[140px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
-            <p className="font-bold text-sm leading-tight truncate">SIPAS PDAM</p>
-            <p className="text-xs text-blue-300 leading-tight truncate">Arsip Digital</p>
+            <p className="font-bold text-base leading-tight truncate">SIPAS PDAM</p>
+            <p className="text-sm text-blue-300 leading-tight truncate">Arsip Digital</p>
           </div>
           {/* Close button - mobile only */}
           <button
@@ -102,14 +106,15 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
       {/* User info */}
       <div className="px-5 py-4 border-b border-blue-800 flex items-center h-[90px] box-border relative overflow-hidden">
          {/* Collapsed Avatar (Desktop only) */}
-         <div className="hidden md:flex group-hover:md:hidden absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-blue-800 rounded-full items-center justify-center shrink-0">
+         <div className="hidden md:flex group-hover:md:hidden absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-blue-800 rounded-full items-center justify-center shrink-0 overflow-hidden border border-blue-700">
+            {/* Try to get image from a prop or session if needed, but since Sidebar is a server/client hybrid, I'll use a placeholder or initials for now unless I pass image down. */}
             <span className="font-bold text-sm">{userName.charAt(0).toUpperCase()}</span>
          </div>
          {/* Full User Info */}
          <div className="flex-1 min-w-[180px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
-          <p className="text-xs text-blue-400 mb-1">Login sebagai</p>
-          <p className="font-semibold text-sm leading-tight truncate">{userName}</p>
-          <span className="inline-block mt-1 text-xs bg-blue-700 px-2 py-0.5 rounded-full text-blue-100 truncate">
+          <p className="text-sm text-blue-400 mb-1">Login sebagai</p>
+          <p className="font-semibold text-base leading-tight truncate">{userName}</p>
+          <span className="inline-block mt-1 text-sm bg-blue-700 px-2 py-0.5 rounded-full text-blue-100 truncate">
             {roleLabel[role]}
           </span>
          </div>
@@ -126,7 +131,7 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors relative",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-colors relative",
                 active
                   ? "bg-blue-700 text-white font-medium"
                   : "text-blue-200 hover:bg-blue-800 hover:text-white"

@@ -1,3 +1,9 @@
+/**
+ * @file lib/prisma.ts
+ * @description Konfigurasi dan inisialisasi Prisma Client.
+ * Mengelola koneksi ke database PostgreSQL (Supabase) menggunakan pooling 
+ * untuk efisiensi koneksi di lingkungan serverless/edge.
+ */
 // lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";

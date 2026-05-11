@@ -29,7 +29,7 @@ export function DocumentTable({
 
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200">
-      <table className="w-full text-sm">
+      <table className="w-full text-base">
         <thead>
           <tr>
             <th className="table-th rounded-tl-xl">No. Surat</th>
@@ -43,19 +43,19 @@ export function DocumentTable({
         <tbody className="bg-white divide-y divide-gray-100">
           {documents.map((doc) => (
             <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
-              <td className="table-td font-mono text-xs font-medium text-blue-700 whitespace-nowrap">
+              <td className="table-td font-mono text-sm font-medium text-blue-700 whitespace-nowrap">
                 {doc.nomorSurat}
               </td>
               <td className="table-td max-w-xs">
                 <p className="truncate font-medium text-gray-900">{doc.perihal}</p>
                 {doc.tujuan && (
-                  <p className="text-xs text-gray-400 truncate mt-0.5">Kepada: {doc.tujuan}</p>
+                  <p className="text-sm text-gray-400 truncate mt-0.5">Kepada: {doc.tujuan}</p>
                 )}
               </td>
               {showCreator && (
                 <td className="table-td whitespace-nowrap">
                   <p className="font-medium">{doc.createdBy.name}</p>
-                  <p className="text-xs text-gray-400">{doc.createdBy.divisi ?? "-"}</p>
+                  <p className="text-sm text-gray-400">{doc.createdBy.divisi ?? "-"}</p>
                 </td>
               )}
               <td className="table-td whitespace-nowrap text-gray-500">
@@ -67,7 +67,7 @@ export function DocumentTable({
               <td className="table-td text-center">
                 <Link
                   href={`${basePath}/dokumen/${doc.id}`}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium
                              text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                 >
                   <Eye className="w-3.5 h-3.5" />

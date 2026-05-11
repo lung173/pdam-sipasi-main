@@ -11,6 +11,8 @@ declare module "next-auth" {
     id: string;
     role: UserRole;
     divisi?: string | null;
+    title?: string | null;
+    image?: string | null;
   }
   interface Session {
     user: {
@@ -19,6 +21,8 @@ declare module "next-auth" {
       email: string;
       role: UserRole;
       divisi?: string | null;
+      title?: string | null;
+      image?: string | null;
     };
   }
 }
@@ -28,6 +32,8 @@ declare module "next-auth/jwt" {
     id: string;
     role: UserRole;
     divisi?: string | null;
+    title?: string | null;
+    image?: string | null;
   }
 }
 
@@ -62,6 +68,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           divisi: user.divisi,
+          title: user.title,
+          image: user.image,
         };
       },
     }),
@@ -73,18 +81,44 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.divisi = user.divisi;
+        token.title = user.title;
+        token.image = user.image;
       }
+      
+      // Update token if user profile is updated
+      if (trigger === "update" && session) {
+        token.name = session.name;
+        token.title = session.title;
+        token.image = session.image;
+      }
+
+      // Re-sync with DB periodically or on demand
+      if (!token.title || !token.image) {
+        const dbUser = await prisma.user.findUnique({ 
+          where: { id: token.id as string },
+          select: { title: true, image: true, name: true }
+        });
+        if (dbUser) {
+          token.title = dbUser.title;
+          token.image = dbUser.image;
+          token.name = dbUser.name;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.role = token.role;
-      session.user.divisi = token.divisi;
+      session.user.id = token.id as string;
+      session.user.role = token.role as UserRole;
+      session.user.divisi = token.divisi as string;
+      session.user.title = token.title as string;
+      session.user.image = token.image as string;
+      session.user.name = token.name as string;
       return session;
     },
   },

@@ -60,17 +60,17 @@ export default async function AdminDashboard() {
             <Users className="w-4 h-4" /> Kelola User
           </Link>
           <Link href="/dashboard/admin/arsip" className="btn-primary">
-            <Archive className="w-4 h-4" /> Arsip Queue ({menungguArsip})
+            <Archive className="w-4 h-4" /> Arsip ({menungguArsip})
           </Link>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Dokumen"  value={totalDokumen} icon={FileText}  color="blue" />
-        <StatCard title="User Aktif"     value={totalUser}    icon={Users}     color="green" />
-        <StatCard title="Antrian Arsip"  value={menungguArsip}icon={Clock}     color="yellow" subtitle="Perlu diarsipkan" />
-        <StatCard title="Arsip Selesai"  value={arsipFinal}   icon={CheckCircle}color="purple" />
+        <StatCard title="Total Dokumen" value={totalDokumen} icon={FileText} color="blue" />
+        <StatCard title="User Aktif" value={totalUser} icon={Users} color="green" />
+        <StatCard title="Antrian Arsip" value={menungguArsip} icon={Clock} color="yellow" subtitle="Perlu diarsipkan" />
+        <StatCard title="Arsip Selesai" value={arsipFinal} icon={CheckCircle} color="purple" />
       </div>
 
       {/* Alert arsip */}

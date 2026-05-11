@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, props: Params) {
       ]);
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: newStatus,
         changedBy: user.id,
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: langsung ? "JADWAL_LANGSUNG" : "JADWAL_KIRIM_DIREKTUR",
         description: `Jadwal pengiriman ke Direktur: ${waktu}`,
         metadata: { waktu, isUrgen, jadwalKirim },

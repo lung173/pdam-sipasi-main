@@ -32,26 +32,16 @@ export async function POST(req: NextRequest, props: Params) {
 
       const prevStatus = doc.currentStatus;
 
-      const [handoverLog, updatedDoc] = await prisma.$transaction([
-        prisma.handoverLog.create({
-          data: {
-            documentId: doc.id,
-            staffId: doc.createdById,
-            agendarisId: user.id, // we keep the DB column name as is since we didn't migrate it
-            confirmationStatus: "MENUNGGU",
-          },
-        }),
-        prisma.suratMasuk.update({
-          where: { id: doc.id },
-          data: {
-            currentStatus: "MENUNGGU_PENGAMBILAN_STAFF",
-            currentHolder: doc.createdById,
-          },
-        }),
-      ]);
+      const updatedDoc = await prisma.suratMasuk.update({
+        where: { id: doc.id },
+        data: {
+          currentStatus: "MENUNGGU_PENGAMBILAN_STAFF",
+          currentHolder: doc.createdById,
+        },
+      });
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: "MENUNGGU_PENGAMBILAN_STAFF",
         changedBy: user.id,
@@ -60,14 +50,14 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "NOTIFY_PICKUP",
         description: `Admin mengirim notifikasi pengambilan ke Staff: ${doc.createdBy.name}`,
         ipAddress: getClientIp(request),
       });
 
       return successResponse(
-        { handoverLog, document: updatedDoc },
+        { document: updatedDoc },
         `Notifikasi pengambilan berhasil dikirim ke ${doc.createdBy.name}.`
       );
     } catch (error) {
@@ -95,30 +85,15 @@ export async function PUT(req: NextRequest, props: Params) {
         return errorResponse("Dokumen tidak dalam status menunggu pengambilan.", 400);
       }
 
-      const handoverLog = await prisma.handoverLog.findFirst({
-        where: { documentId: doc.id, staffId: user.id, confirmationStatus: "MENUNGGU" },
-        orderBy: { handoverTime: "desc" },
-      });
-
       const prevStatus = doc.currentStatus;
 
-      await prisma.$transaction([
-        ...(handoverLog
-          ? [
-              prisma.handoverLog.update({
-                where: { id: handoverLog.id },
-                data: { confirmationStatus: "DIKONFIRMASI", confirmedAt: new Date() },
-              }),
-            ]
-          : []),
-        prisma.suratMasuk.update({
-          where: { id: doc.id },
-          data: { currentStatus: "MENUNGGU_SCAN_FINAL" },
-        }),
-      ]);
+      await prisma.suratMasuk.update({
+        where: { id: doc.id },
+        data: { currentStatus: "MENUNGGU_SCAN_FINAL" },
+      });
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: "MENUNGGU_SCAN_FINAL",
         changedBy: user.id,
@@ -127,7 +102,7 @@ export async function PUT(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "PICKUP_CONFIRMED",
         description: `Staff mengkonfirmasi pengambilan surat ${doc.nomorSurat}`,
         ipAddress: getClientIp(request),

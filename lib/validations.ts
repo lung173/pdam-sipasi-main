@@ -1,3 +1,9 @@
+/**
+ * @file lib/validations.ts
+ * @description Definisi skema validasi data menggunakan Zod.
+ * Digunakan baik di sisi client (form) maupun server (API) untuk memastikan 
+ * integritas data input (login, pembuatan user, surat, review, dan keputusan).
+ */
 // lib/validations.ts
 import { z } from "zod";
 

@@ -1,3 +1,9 @@
+/**
+ * @file lib/auth-helpers.ts
+ * @description Utilitas pembantu autentikasi dan otorisasi. 
+ * Menyediakan middleware untuk memproteksi rute API berdasarkan session dan role user, 
+ * serta helper untuk standarisasi format response API.
+ */
 // lib/auth-helpers.ts
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";

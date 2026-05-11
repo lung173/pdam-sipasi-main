@@ -71,7 +71,7 @@ export async function POST(req: NextRequest, props: Params) {
       ]);
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: newStatus,
         changedBy: user.id,
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: `REVIEW_${reviewStatus}`,
         description: `Admin ${reviewStatus === "DITERUSKAN" ? "meneruskan" : "mengembalikan"} dokumen ${doc.nomorSurat}`,
         metadata: { reviewStatus, reviewNote },

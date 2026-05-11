@@ -46,7 +46,7 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
 
         {/* Header */}
         <div className="border-b-2 border-gray-400 py-3 px-4 text-center">
-          <p className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-snug">
+          <p className="text-xs font-bold text-gray-800 uppercase tracking-wide leading-snug">
             PERUSAHAAN UMUM DAERAH AIR MINUM TIRTA MAKMUR KABUPATEN SUKOHARJO
           </p>
           <p className="text-base font-bold mt-1 tracking-widest text-gray-900">
@@ -74,10 +74,10 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-300 border-b-2 border-gray-400">
           {/* Left */}
           <div className="p-3">
-            <p className="font-bold text-gray-800 mb-2 text-xs uppercase tracking-wide">
+            <p className="font-bold text-gray-800 mb-2 text-sm uppercase tracking-wide">
               Disposisi Kepada :
             </p>
-            <div className="text-xs text-gray-900 px-3 py-2 bg-blue-50 ring-1 ring-blue-400 rounded">
+            <div className="text-sm text-gray-900 px-3 py-2 bg-blue-50 ring-1 ring-blue-400 rounded">
               {disposisi.jabatanKe ? (
                 <ul className="list-decimal pl-3 space-y-0.5">
                   {disposisi.jabatanKe.split(",").map((j, i) => (
@@ -95,19 +95,19 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
           {/* Right */}
           <div className="p-3 space-y-3">
             <div>
-              <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+              <p className="font-bold text-gray-800 mb-1.5 text-sm uppercase tracking-wide">
                 Tanggal Penyelesaian :
               </p>
-              <p className="text-xs text-gray-700">
+              <p className="text-sm text-gray-700">
                 {fmtDate(disposisi.tanggalTandaTangan)}
               </p>
             </div>
             {disposisi.keterangan && (
               <div>
-                <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+                <p className="font-bold text-gray-800 mb-1.5 text-sm uppercase tracking-wide">
                   Catatan :
                 </p>
-                <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">
                   {disposisi.keterangan}
                 </p>
               </div>
@@ -117,16 +117,16 @@ export function DisposisiViewer({ disposisi, doc }: DisposisiViewerProps) {
 
         {/* Instruksi */}
         <div className="p-3">
-          <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+          <p className="font-bold text-gray-800 mb-1.5 text-sm uppercase tracking-wide">
             Isi Instruksi / Informasi :
           </p>
-          <p className="text-xs text-gray-900 whitespace-pre-wrap leading-relaxed">
+          <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
             {disposisi.instruksi ?? "-"}
           </p>
         </div>
 
         {/* Footer metadata */}
-        <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 flex items-center justify-between text-[10px] text-gray-400">
+        <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 flex items-center justify-between text-xs text-gray-400">
           <span>Dari: {disposisi.dari.name}</span>
           <span>Dibuat: {fmtDate(disposisi.createdAt)}</span>
         </div>
@@ -148,10 +148,10 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-start gap-1 px-3 py-2">
-      <span className="text-xs font-semibold text-gray-600 shrink-0 w-28">{label}</span>
-      <span className="text-xs text-gray-500 shrink-0">:</span>
+      <span className="text-sm font-semibold text-gray-600 shrink-0 w-28">{label}</span>
+      <span className="text-sm text-gray-500 shrink-0">:</span>
       <span
-        className={`text-xs text-gray-900 ml-1 ${mono ? "font-mono" : ""} ${
+        className={`text-sm text-gray-900 ml-1 ${mono ? "font-mono" : ""} ${
           multiline ? "whitespace-pre-wrap break-words" : "truncate"
         }`}
       >

@@ -39,6 +39,7 @@ export async function POST(req: NextRequest, props: Params) {
           nomorAgenda?: string;
           tanggalSurat?: string;
           tanggalTerima?: string;
+          category?: string;
         };
 
         const doc = await prisma.suratMasuk.findUnique({ where: { id: params.id } });
@@ -61,11 +62,12 @@ export async function POST(req: NextRequest, props: Params) {
             ...(nomorAgenda && { nomorAgenda }),
             ...(tanggalSurat && { tanggalSurat: new Date(tanggalSurat) }),
             ...(tanggalTerima && { tanggalTerima: new Date(tanggalTerima) }),
+            ...(body.category && { category: body.category }),
           },
         });
 
         await createStatusTimeline({
-          documentId: doc.id,
+          suratMasukId: doc.id,
           fromStatus: prevStatus,
           toStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR",
           changedBy: user.id,
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest, props: Params) {
 
         await createAuditLog({
           userId: user.id,
-          documentId: doc.id,
+          suratMasukId: doc.id,
           action: "DOKUMEN_DITERUSKAN_KE_DIREKTUR",
           description: `Agendaris meneruskan dokumen ${doc.nomorSurat} ke Direktur`,
           metadata: { nomorSurat, perihal, asalSurat, nomorAgenda },
@@ -158,7 +160,7 @@ export async function POST(req: NextRequest, props: Params) {
       }
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: prevStatus as never, // Status tidak berubah, hanya disposisi tersimpan
         changedBy: user.id,
@@ -167,7 +169,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "DISPOSISI_DIISI_DIREKTUR",
         description: `Direktur mengisi lembar disposisi untuk ${doc.nomorSurat}. Kepada: ${jabatanKe}`,
         metadata: { jabatanKe, instruksi },

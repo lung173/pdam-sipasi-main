@@ -1,3 +1,9 @@
+/**
+ * @file lib/pdf-stamper.ts
+ * @description Modul untuk membubuhkan QR Code pada dokumen PDF.
+ * Digunakan untuk sistem Tanda Tangan Elektronik (TTE) dengan menghasilkan QR Code 
+ * yang merujuk pada halaman verifikasi dokumen dan menempelkannya di halaman terakhir PDF.
+ */
 import { PDFDocument, rgb } from "pdf-lib";
 import QRCode from "qrcode";
 import fs from "fs/promises";

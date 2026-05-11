@@ -1,9 +1,14 @@
+/**
+ * @file lib/audit.ts
+ * @description Modul untuk pencatatan log audit dan riwayat status dokumen.
+ * Digunakan untuk melacak setiap aksi user dan perubahan status surat masuk secara otomatis.
+ */
 // lib/audit.ts
 import { prisma } from "./prisma";
 
 interface AuditParams {
   userId: string;
-  documentId?: string;
+  suratMasukId?: string;
   action: string;
   description?: string;
   metadata?: Record<string, unknown>;
@@ -15,7 +20,7 @@ export async function createAuditLog(params: AuditParams): Promise<void> {
     await prisma.auditLog.create({
       data: {
         userId: params.userId,
-        suratMasukId: params.documentId,
+        suratMasukId: params.suratMasukId,
         action: params.action,
         description: params.description,
         metadata: params.metadata ?? {},
@@ -29,7 +34,7 @@ export async function createAuditLog(params: AuditParams): Promise<void> {
 }
 
 export async function createStatusTimeline(params: {
-  documentId: string;
+  suratMasukId: string;
   fromStatus: string | null;
   toStatus: string;
   changedBy: string;
@@ -38,7 +43,7 @@ export async function createStatusTimeline(params: {
   try {
     await prisma.statusTimeline.create({
       data: {
-        suratMasukId: params.documentId,
+        suratMasukId: params.suratMasukId,
         fromStatus: params.fromStatus as never,
         toStatus: params.toStatus as never,
         changedById: params.changedBy,

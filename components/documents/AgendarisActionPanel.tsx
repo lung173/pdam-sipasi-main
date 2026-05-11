@@ -17,6 +17,7 @@ interface DocProps {
   tanggalTerima?: Date | string;
   asalSurat?: string | null;
   nomorAgenda?: string | null;
+  category?: string;
 }
 
 type Mode = "idle" | "teruskan" | "kembalikan" | "disposisi";
@@ -67,6 +68,7 @@ export function AgendarisActionPanel({
   const [editTanggalTerima, setEditTanggalTerima] = useState(toDateInput(doc.tanggalTerima));
   const [editAsalSurat, setEditAsalSurat] = useState(doc.asalSurat ?? "");
   const [editNomorAgenda, setEditNomorAgenda] = useState(doc.nomorAgenda ?? "");
+  const [editCategory, setEditCategory] = useState(doc.category ?? "DLL");
 
   const reset = () => {
     setMode("idle");
@@ -135,6 +137,7 @@ export function AgendarisActionPanel({
           nomorAgenda: editNomorAgenda || undefined,
           tanggalSurat: editTanggalSurat || undefined,
           tanggalTerima: editTanggalTerima || undefined,
+          category: editCategory,
         }),
       });
       const json = await res.json();
@@ -378,6 +381,23 @@ export function AgendarisActionPanel({
                       value={editNomorSurat}
                       onChange={(e) => setEditNomorSurat(e.target.value)}
                     />
+                  </FormEditRow>
+                </div>
+                {/* Row 4: Kategori Keperluan */}
+                <div className="grid grid-cols-1 divide-gray-300">
+                  <FormEditRow label="Kategori Keperluan">
+                    <select
+                      className="form-input text-xs py-1"
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                    >
+                      <option value="UNDANGAN">UNDANGAN</option>
+                      <option value="PEMBELIAN">PEMBELIAN</option>
+                      <option value="KERJASAMA">KERJASAMA</option>
+                      <option value="KEPEGAWAIAN">KEPEGAWAIAN</option>
+                      <option value="KEUANGAN">KEUANGAN</option>
+                      <option value="DLL">DAN LAIN-LAIN (DLL)</option>
+                    </select>
                   </FormEditRow>
                 </div>
               </div>

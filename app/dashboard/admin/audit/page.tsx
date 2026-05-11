@@ -89,7 +89,7 @@ export default async function AuditLogPage() {
                     <p className="text-xs text-gray-600 truncate">{log.description ?? "-"}</p>
                   </td>
                   <td className="table-td">
-                    {log.document ? (
+                    {log.suratMasuk ? (
                       <span className="font-mono text-xs text-blue-700">{log.suratMasuk?.nomorSurat}</span>
                     ) : "-"}
                   </td>

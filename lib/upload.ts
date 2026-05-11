@@ -1,3 +1,9 @@
+/**
+ * @file lib/upload.ts
+ * @description Modul untuk menangani validasi dan penyimpanan file upload.
+ * Mendukung pembatasan tipe file (PDF, JPG, PNG) dan ukuran maksimum (20MB), 
+ * serta menghasilkan nama file unik untuk penyimpanan di folder public/uploads.
+ */
 // lib/upload.ts
 import path from "path";
 import fs from "fs/promises";

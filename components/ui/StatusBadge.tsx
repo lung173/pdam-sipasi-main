@@ -14,7 +14,7 @@ export function StatusBadge({ status, size = "md" }: Props) {
       className={cn(
         "inline-flex items-center rounded-full font-medium whitespace-nowrap",
         STATUS_COLORS[status],
-        size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-xs"
+        size === "sm" ? "px-2 py-0.5 text-sm" : "px-2.5 py-1 text-base"
       )}
     >
       {STATUS_LABELS[status]}

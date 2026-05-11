@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, props: Params) {
       const [archive, updatedDoc] = await prisma.$transaction([
         prisma.archive.create({
           data: {
-            documentId: doc.id,
+            suratMasukId: doc.id,
             archivedById: user.id,
             serverLocation,
             notes: parsed.data.notes,
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, props: Params) {
       ]);
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: "ARSIP_FINAL_TERSIMPAN",
         changedBy: user.id,
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "DOCUMENT_ARCHIVED",
         description: `Dokumen ${doc.nomorSurat} diarsipkan ke ${serverLocation}`,
         metadata: { serverLocation, notes: parsed.data.notes },

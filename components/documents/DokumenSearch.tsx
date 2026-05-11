@@ -40,14 +40,7 @@ export function DokumenSearch() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-200/80">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 bg-blue-50 rounded-md">
-          <Filter className="w-4 h-4 text-blue-600" />
-        </div>
-        <h3 className="text-sm font-semibold text-gray-800">Filter Pencarian Dokumen</h3>
-      </div>
-      
+    <form onSubmit={handleSearch} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200/80">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
         {/* Search Input */}
         <div className="md:col-span-6 relative group">
@@ -86,23 +79,13 @@ export function DokumenSearch() {
         </div>
 
         {/* Action Buttons */}
-        <div className="md:col-span-2 flex items-center gap-2">
+        <div className="md:col-span-2 flex items-center">
           <button
             type="submit"
-            className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-blue-600/20 active:scale-[0.98]"
+            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm shadow-blue-600/20 active:scale-[0.98]"
           >
             Terapkan
           </button>
-          {(params.get("q") || params.get("date")) && (
-            <button
-              type="button"
-              onClick={handleReset}
-              title="Reset Filter"
-              className="p-2.5 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 rounded-lg transition-all active:scale-[0.98]"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
     </form>

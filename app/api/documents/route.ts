@@ -1,3 +1,9 @@
+/**
+ * @file app/api/documents/route.ts
+ * @description Handler untuk rute API dokumen (koleksi).
+ * Mendukung pengambilan daftar dokumen (GET) dengan filter dan paginasi, 
+ * serta pembuatan dokumen baru (POST) oleh Admin Staff.
+ */
 // app/api/documents/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -113,7 +119,7 @@ export async function POST(req: NextRequest) {
 
       // Timeline & Audit
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: null,
         toStatus: "DRAFT",
         changedBy: user.id,
@@ -122,7 +128,7 @@ export async function POST(req: NextRequest) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "DOCUMENT_CREATED",
         description: `Dokumen baru dibuat: ${nomorSurat}`,
         metadata: { nomorSurat, perihal },

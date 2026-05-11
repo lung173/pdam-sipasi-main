@@ -27,7 +27,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       // Add a status timeline entry marked as URGENT Reminder
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: doc.currentStatus,
         toStatus: doc.currentStatus, // Tidak mengubah status
         changedBy: user.id,
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "REMIND_DIRECTOR",
         description: `Admin mengirim reminder ke direktur untuk dokumen ${doc.nomorSurat}`,
         ipAddress: getClientIp(request),

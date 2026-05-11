@@ -127,7 +127,7 @@ export async function POST(req: NextRequest, props: Params) {
       };
 
       await createStatusTimeline({
-        documentId: doc.id,
+        suratMasukId: doc.id,
         fromStatus: prevStatus,
         toStatus: nextStatus as any,
         changedBy: user.id,
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: `DIRECTOR_DECISION_${decisionType}`,
         description: `Direktur memberi keputusan ${decisionType} untuk dokumen ${doc.nomorSurat}`,
         metadata: { decisionType, decisionNote },

@@ -32,7 +32,6 @@ export async function GET(req: NextRequest, props: Params) {
           archive: {
             include: { archivedBy: { select: { name: true } } },
           },
-          handoverLogs: { orderBy: { handoverTime: "desc" }, take: 5 },
         },
       });
 
@@ -89,7 +88,7 @@ export async function PATCH(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: doc.id,
+        suratMasukId: doc.id,
         action: "DOCUMENT_UPDATED",
         description: `Dokumen diperbarui: ${doc.nomorSurat}`,
         ipAddress: getClientIp(request),
@@ -124,7 +123,7 @@ export async function DELETE(req: NextRequest, props: Params) {
 
       await createAuditLog({
         userId: user.id,
-        documentId: undefined,
+        suratMasukId: undefined,
         action: "DOCUMENT_DELETED",
         description: `Dokumen dihapus: ${doc.nomorSurat}`,
         ipAddress: getClientIp(request),

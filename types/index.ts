@@ -1,5 +1,10 @@
+/**
+ * @file types/index.ts
+ * @description Definisi tipe data (interfaces & types) global untuk aplikasi.
+ * Menyediakan standarisasi struktur data untuk dokumen, user, timeline, 
+ * serta mapping label dan warna untuk status dokumen.
+ */
 // types/index.ts
-// Central type definitions untuk seluruh sistem
 
 import {
   UserRole,
@@ -21,6 +26,8 @@ export interface UserPayload {
   email: string;
   role: UserRole;
   divisi?: string | null;
+  title?: string | null;
+  image?: string | null;
 }
 
 export interface UserSession extends UserPayload {
@@ -35,6 +42,7 @@ export interface DocumentListItem {
   id: string;
   nomorSurat: string;
   perihal: string;
+  tujuan?: string | null;
   asalSurat: string | null;
   tanggalSurat: Date | string;
   currentStatus: DocumentStatus;
