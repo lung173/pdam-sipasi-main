@@ -1,8 +1,9 @@
 /**
  * @file app/api/documents/route.ts
  * @description Handler untuk rute API dokumen (koleksi).
- * Mendukung pengambilan daftar dokumen (GET) dengan filter dan paginasi, 
- * serta pembuatan dokumen baru (POST) oleh Admin Staff.
+ * Mendukung pengambilan daftar dokumen (GET) dengan filter documentType dan paginasi, 
+ * serta pembuatan dokumen baru (POST) oleh Agendaris dan Staff.
+ * Agendaris bisa membuat semua 7 jenis surat.
  */
 // app/api/documents/route.ts
 import { NextRequest, NextResponse } from "next/server";
@@ -10,10 +11,10 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog, createStatusTimeline } from "@/lib/audit";
 import { createDocumentSchema } from "@/lib/validations";
-import { DocumentStatus } from "@prisma/client";
+import { DocumentStatus, DocumentType } from "@prisma/client";
 
 // ─── GET /api/documents ──────────────────────────────────────
-// Ambil daftar dokumen sesuai role
+// Ambil daftar dokumen sesuai role, dengan filter documentType
 export async function GET(req: NextRequest) {
   return requireAuth(req, async (user) => {
     try {
@@ -22,6 +23,8 @@ export async function GET(req: NextRequest) {
       const limit = parseInt(searchParams.get("limit") ?? "20");
       const status = searchParams.get("status") as DocumentStatus | null;
       const search = searchParams.get("search") ?? "";
+      const docType = searchParams.get("documentType") as DocumentType | null;
+      const category = searchParams.get("category") ?? "";
       const skip = (page - 1) * limit;
 
       // Filter berdasarkan role
@@ -31,13 +34,16 @@ export async function GET(req: NextRequest) {
         // Staff hanya lihat dokumen miliknya
         whereBase.createdById = user.id;
       }
-      // Agendaris, Direktur, Admin bisa lihat semua
+      // Agendaris, Direktur, Kabag bisa lihat semua
 
       if (status) whereBase.currentStatus = status;
+      if (docType) whereBase.documentType = docType;
+      if (category) whereBase.category = category;
       if (search) {
         whereBase.OR = [
           { nomorSurat: { contains: search, mode: "insensitive" } },
           { perihal: { contains: search, mode: "insensitive" } },
+          { asalSurat: { contains: search, mode: "insensitive" } },
         ];
       }
 
@@ -69,11 +75,12 @@ export async function GET(req: NextRequest) {
 }
 
 // ─── POST /api/documents ─────────────────────────────────────
-// Staff membuat dokumen baru
+// Agendaris & Staff membuat dokumen baru
+// Agendaris bisa membuat semua 7 jenis surat
 export async function POST(req: NextRequest) {
   return requireAuth(req, async (user, request) => {
-    if (user.role !== "ADMIN_STAFF" && user.role !== "AGENDARIS") {
-      return errorResponse("Hanya Staff yang dapat membuat dokumen.", 403);
+    if (user.role !== "ADMIN_STAFF" && user.role !== "AGENDARIS" && user.role !== "DIREKTUR") {
+      return errorResponse("Hanya Staff, Agendaris, atau Direktur yang dapat membuat dokumen.", 403);
     }
 
     try {
@@ -87,13 +94,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const { nomorSurat: rawNomor, perihal, deskripsi, tujuan, tanggalSurat } = parsed.data;
+      const { nomorSurat: rawNomor, perihal, deskripsi, tujuan, asalSurat, tanggalSurat, documentType, category } = parsed.data;
 
       // Jika staff tidak mengisi nomor surat, auto-generate nomor draft sementara
       const today = new Date();
       const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
       const suffix = Math.floor(1000 + Math.random() * 9000);
-      const nomorSurat = rawNomor ?? `DRAFT-${dateStr}-${suffix}`;
+      const typePrefix = documentType ? documentType.replace(/_/g, "-") : "DRAFT";
+      const nomorSurat = rawNomor ?? `${typePrefix}-${dateStr}-${suffix}`;
 
       // Cek nomor surat duplikat
       const existing = await prisma.suratMasuk.findUnique({ where: { nomorSurat } });
@@ -101,16 +109,25 @@ export async function POST(req: NextRequest) {
         return errorResponse(`Nomor surat "${nomorSurat}" sudah ada dalam sistem.`, 409);
       }
 
+      // Agendaris membuat surat: langsung status MENUNGGU_REVIEW_AGENDARIS (atau DRAFT)
+      // Staff membuat surat: status DRAFT
+      const initialStatus = user.role === "AGENDARIS" 
+        ? "MENUNGGU_REVIEW_AGENDARIS" 
+        : "DRAFT";
+
       const doc = await prisma.suratMasuk.create({
         data: {
           nomorSurat,
           perihal,
           deskripsi,
           tujuan,
+          asalSurat,
           tanggalSurat: new Date(tanggalSurat),
-          currentStatus: "DRAFT",
+          currentStatus: initialStatus,
           createdById: user.id,
           currentHolder: user.id,
+          documentType: documentType ?? "SURAT_MASUK",
+          category: category ?? "DLL",
         },
         include: {
           createdBy: { select: { id: true, name: true, divisi: true } },
@@ -121,17 +138,17 @@ export async function POST(req: NextRequest) {
       await createStatusTimeline({
         suratMasukId: doc.id,
         fromStatus: null,
-        toStatus: "DRAFT",
+        toStatus: initialStatus,
         changedBy: user.id,
-        notes: "Dokumen dibuat oleh Staff",
+        notes: `Dokumen ${documentType ?? "SURAT_MASUK"} dibuat oleh ${user.role === "AGENDARIS" ? "Agendaris" : "Staff"}`,
       });
 
       await createAuditLog({
         userId: user.id,
         suratMasukId: doc.id,
         action: "DOCUMENT_CREATED",
-        description: `Dokumen baru dibuat: ${nomorSurat}`,
-        metadata: { nomorSurat, perihal },
+        description: `Dokumen baru dibuat: ${nomorSurat} (${documentType ?? "SURAT_MASUK"})`,
+        metadata: { nomorSurat, perihal, documentType },
         ipAddress: getClientIp(request),
       });
 

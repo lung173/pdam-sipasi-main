@@ -26,7 +26,7 @@ export default async function CetakDisposisi(props: Params) {
 
   if (!doc) notFound();
 
-  const latestDisposisi = (doc as any).disposisi?.[0] ?? null;
+  const latestDisposisi = doc.disposisi?.[0] ?? null;
   
   const ROLE_LABELS: Record<string, string> = {
     ADMIN_STAFF: "Admin Staff",

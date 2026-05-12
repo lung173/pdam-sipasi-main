@@ -9,12 +9,11 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { AdminArchivePanel } from "@/components/documents/AdminArchivePanel";
 import { AgendarisActionPanel } from "@/components/documents/AgendarisActionPanel";
-import { DocumentPreview } from "@/components/documents/DocumentPreview";
+import { FileListViewer } from "@/components/documents/FileListViewer";
 import { DECISION_LABELS } from "@/types";
 import { DecisionType } from "@prisma/client";
 
 export default function AdminArsipDetailClient({ doc, staffUsers }: { doc: any; staffUsers: any }) {
-  const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
 
   const latestDecision = doc.decisions[0];
   const latestDisposisi = doc.disposisi?.[0] ?? null;
@@ -77,38 +76,18 @@ export default function AdminArsipDetailClient({ doc, staffUsers }: { doc: any; 
           )}
 
           {/* Files - Draft */}
-          {draftFiles.length > 0 && (
-            <div className="card p-5 space-y-3">
-              <h3 className="font-semibold text-gray-900">File Draft</h3>
-              <div className="space-y-2">
-                {draftFiles.map((f: any) => (
-                  <FileRow key={f.id} file={f} onPreview={(url, name) => setPreviewFile({ url, name })} />
-                ))}
-              </div>
-            </div>
-          )}
-
+          <FileListViewer 
+            files={draftFiles} 
+            title="File Draft" 
+            emptyMessage="Belum ada file draft." 
+          />
+          
           {/* Files - Scan Final */}
-          <div className="card p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">File Scan Final</h3>
-              {scanFiles.length > 0 && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                  {scanFiles.length} file tersedia
-                </span>
-              )}
-            </div>
-            {scanFiles.length === 0 ? (
-              <p className="text-sm text-red-500 font-medium">Belum ada file scan final. Pastikan Staff sudah mengupload scan.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {scanFiles.map((f: any) => (
-                  <FileRow key={f.id} file={f} highlight onPreview={(url, name) => setPreviewFile({ url, name })} />
-                ))}
-              </div>
-            )}
-          </div>
+          <FileListViewer 
+            files={scanFiles} 
+            title="File Scan Final" 
+            emptyMessage="Belum ada file scan final. Pastikan Staff sudah mengupload scan." 
+          />
 
           {/* Lembar Disposisi (tampil setelah Direktur memberikan keputusan) */}
           {doc.currentStatus === "KEPUTUSAN_DIREKTUR_SELESAI" && (
@@ -241,12 +220,8 @@ export default function AdminArsipDetailClient({ doc, staffUsers }: { doc: any; 
         </div>
       </div>
 
-      <DocumentPreview 
-        isOpen={!!previewFile}
-        onClose={() => setPreviewFile(null)}
-        fileUrl={previewFile?.url || ""}
-        fileName={previewFile?.name || ""}
-      />
+      {/* Spacing bottom */}
+      <div className="h-10" />
     </div>
   );
 }
@@ -265,39 +240,7 @@ function InfoRow({ icon: Icon, label, value, mono }: {
   );
 }
 
-function FileRow({ file, highlight, onPreview }: {
-  file: { id: string; fileName: string; filePath: string; fileType: string; mimeType: string | null; fileSize: number | null; uploadedBy: { name: string }; uploadedAt: Date | string };
-  highlight?: boolean;
-  onPreview: (url: string, name: string) => void;
-}) {
-  return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg border ${highlight ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"}`}>
-      <FileText className={`w-5 h-5 shrink-0 ${highlight ? "text-green-600" : "text-blue-500"}`} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{file.fileName}</p>
-        <p className="text-xs text-gray-400">
-          {file.fileType} · {file.uploadedBy.name}
-          {file.fileSize ? ` · ${(file.fileSize / 1024).toFixed(0)} KB` : ""}
-        </p>
-      </div>
-      <div className="flex items-center gap-1">
-        <button 
-          onClick={() => onPreview(file.filePath, file.fileName)}
-          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-          title="Preview"
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-        <a href={file.filePath} target="_blank" rel="noreferrer"
-          className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-          title="Unduh"
-        >
-          <Download className="w-4 h-4" />
-        </a>
-      </div>
-    </div>
-  );
-}
+
 
 function DisposisiRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (

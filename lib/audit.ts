@@ -5,6 +5,7 @@
  */
 // lib/audit.ts
 import { prisma } from "./prisma";
+import { Prisma, DocumentStatus } from "@prisma/client";
 
 interface AuditParams {
   userId: string;
@@ -23,7 +24,7 @@ export async function createAuditLog(params: AuditParams): Promise<void> {
         suratMasukId: params.suratMasukId,
         action: params.action,
         description: params.description,
-        metadata: params.metadata ?? {},
+        metadata: (params.metadata ?? {}) as Prisma.InputJsonValue,
         ipAddress: params.ipAddress,
       },
     });
@@ -35,8 +36,8 @@ export async function createAuditLog(params: AuditParams): Promise<void> {
 
 export async function createStatusTimeline(params: {
   suratMasukId: string;
-  fromStatus: string | null;
-  toStatus: string;
+  fromStatus: DocumentStatus | string | null;
+  toStatus: DocumentStatus | string;
   changedBy: string;
   notes?: string;
 }): Promise<void> {
@@ -44,8 +45,8 @@ export async function createStatusTimeline(params: {
     await prisma.statusTimeline.create({
       data: {
         suratMasukId: params.suratMasukId,
-        fromStatus: params.fromStatus as never,
-        toStatus: params.toStatus as never,
+        fromStatus: params.fromStatus as DocumentStatus | null,
+        toStatus: params.toStatus as DocumentStatus,
         changedById: params.changedBy,
         notes: params.notes,
       },

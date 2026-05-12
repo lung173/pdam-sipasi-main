@@ -1,4 +1,4 @@
-﻿// app/dashboard/admin/arsip/page.tsx
+// app/dashboard/admin/arsip/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
@@ -180,7 +180,7 @@ export default async function AdminArsipPage({ searchParams }: Props) {
                   <th className="table-th">Dari</th>
                   <th className="table-th">Lokasi Arsip</th>
                   <th className="table-th">Tanggal Arsip</th>
-                  <th className="table-th">Status</th>
+                  <th className="table-th text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
@@ -203,6 +203,14 @@ export default async function AdminArsipPage({ searchParams }: Props) {
                     </td>
                     <td className="table-td">
                       <StatusBadge status={doc.currentStatus} size="sm" />
+                    </td>
+                    <td className="table-td text-center">
+                      <Link
+                        href={`/dashboard/admin/arsip/${doc.id}`}
+                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2.5 py-1.5 rounded-lg transition-colors font-medium border border-blue-100"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Detail
+                      </Link>
                     </td>
                   </tr>
                 ))}

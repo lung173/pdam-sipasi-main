@@ -3,6 +3,9 @@
  * @description Definisi model database (Schema) untuk sistem SIPASI.
  * Mendefinisikan tabel Users, SuratMasuk, DocumentFile, AuditLog, 
  * dan relasi antar entitas yang digunakan oleh Prisma ORM.
+ * 
+ * Mendukung 7 jenis surat: Undangan, Surat Masuk, Surat Tugas,
+ * Surat Keluar, SK Direktur, Perjanjian, Peraturan Direktur.
  */
 // prisma/schema.prisma
 
@@ -69,12 +72,34 @@ enum UndanganMedia {
   OFFLINE
 }
 
+// 7 Jenis Surat/Dokumen yang dikelola SIPASI
+enum DocumentType {
+  UNDANGAN
+  SURAT_MASUK
+  SURAT_TUGAS
+  SURAT_KELUAR
+  SK_DIREKTUR
+  PERJANJIAN
+  PERATURAN_DIREKTUR
+}
+
+// Undangan bisa internal atau external
+enum UndanganType {
+  INTERNAL
+  EXTERNAL
+}
+
+// Kategori keperluan dokumen (diperluas)
 enum DocumentCategory {
   UNDANGAN
   PEMBELIAN
   KERJASAMA
   KEPEGAWAIAN
   KEUANGAN
+  PERIZINAN
+  PENGADAAN
+  HUKUM
+  TEKNIK
   DLL
 }
 
@@ -120,7 +145,9 @@ model User {
 }
 
 // ─────────────────────────────────────────────
-//  SURAT MASUK (dokumen utama)
+//  SURAT / DOKUMEN UTAMA
+//  Menyimpan semua 7 jenis surat dalam 1 tabel
+//  dengan field `documentType` sebagai pembeda.
 // ─────────────────────────────────────────────
 
 model SuratMasuk {
@@ -141,6 +168,13 @@ model SuratMasuk {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
+  // Jenis dokumen (7 tipe)
+  documentType    DocumentType     @default(SURAT_MASUK) @map("document_type")
+
+  // Tanggal instruksi & penyelesaian (diisi Direktur)
+  tanggalInstruksi    DateTime?   @map("tanggal_instruksi")
+  tanggalPenyelesaian DateTime?   @map("tanggal_penyelesaian")
+
   // Relations
   createdBy       User               @relation("SuratMasukCreator", fields: [createdById], references: [id])
   files           DocumentFile[]
@@ -156,6 +190,7 @@ model SuratMasuk {
   @@index([currentStatus])
   @@index([createdById])
   @@index([nomorSurat])
+  @@index([documentType])
   @@map("surat_masuk")
 }
 
@@ -241,6 +276,12 @@ model DirectorDecision {
   tempat             String?      @map("tempat")
   tanggalTandaTangan DateTime?    @map("tanggal_tanda_tangan")
   parafDirektur      String?      @map("paraf_direktur") // Base64
+
+  // Tanggal instruksi (wajib diisi Direktur)
+  tanggalInstruksi   DateTime?    @map("tanggal_instruksi")
+
+  // Batal tanda tangan — skip auto-sign barcode
+  batalTandaTangan   Boolean      @default(false) @map("batal_tanda_tangan")
   
   decidedAt          DateTime     @default(now()) @map("decided_at")
 
@@ -268,6 +309,10 @@ model LembarDisposisi {
   tempat             String?  @map("tempat")
   tanggalTandaTangan DateTime? @map("tanggal_tanda_tangan")
   parafDariId        String?  @map("paraf_dari_id")
+
+  // Tanggal instruksi & penyelesaian (diisi Direktur)
+  tanggalInstruksi    DateTime? @map("tanggal_instruksi")
+  tanggalPenyelesaian DateTime? @map("tanggal_penyelesaian")
   
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -296,6 +341,12 @@ model Undangan {
   catatanLain  String?       @map("catatan_lain")
   deadline     DateTime      // Deadline kehadiran/konfirmasi
   googleCalId  String?       @map("google_cal_id")
+
+  // Tipe undangan: Internal atau External
+  undanganType     UndanganType @default(INTERNAL) @map("undangan_type")
+  pengirimExternal String?      @map("pengirim_external") // Nama instansi/pengirim luar
+  kontakExternal   String?      @map("kontak_external")   // Nomor kontak pengirim
+
   createdAt    DateTime      @default(now()) @map("created_at")
 
   suratMasuk SuratMasuk       @relation(fields: [suratMasukId], references: [id], onDelete: Cascade)

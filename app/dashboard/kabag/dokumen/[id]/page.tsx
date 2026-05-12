@@ -13,6 +13,7 @@ import { ArrowLeft, FileText, Download, Calendar, User, Building, AlertCircle } 
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { DisposisiViewer } from "@/components/documents/DisposisiViewer";
+import { FileListViewer } from "@/components/documents/FileListViewer";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -71,7 +72,7 @@ export default async function KabagDocumentDetail(props: Params) {
                 <h3 className="font-bold text-blue-900">Instruksi Direktur Utama</h3>
               </div>
               <p className="text-lg text-blue-800 italic leading-relaxed font-serif">
-                "{latestDisposisi.instruksi || "Silakan lakukan tindak lanjut sesuai prosedur yang berlaku."}"
+                &ldquo;{latestDisposisi.instruksi ? latestDisposisi.instruksi : "Silakan lakukan tindak lanjut sesuai prosedur yang berlaku."}&rdquo;
               </p>
               <div className="mt-4 pt-4 border-t border-blue-100 flex items-center justify-between text-xs text-blue-600">
                 <span>Diteruskan oleh: {latestDisposisi.dari.name}</span>
@@ -112,32 +113,11 @@ export default async function KabagDocumentDetail(props: Params) {
           )}
 
           {/* File Lampiran */}
-          <div className="card p-5 space-y-3">
-            <h3 className="font-semibold text-gray-900">File Lampiran</h3>
-            {doc.files.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">Tidak ada file lampiran.</p>
-            ) : (
-              <div className="space-y-2">
-                {doc.files.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 group">
-                    <FileText className="w-5 h-5 text-blue-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{f.fileName}</p>
-                      <p className="text-[10px] text-gray-400 uppercase">{f.fileType}</p>
-                    </div>
-                    <a
-                      href={f.filePath}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all shadow-sm"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <FileListViewer 
+            files={doc.files} 
+            title="File Lampiran" 
+            emptyMessage="Tidak ada file lampiran." 
+          />
         </div>
 
         {/* Sidebar: Timeline */}

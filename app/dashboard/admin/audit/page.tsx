@@ -24,17 +24,21 @@ export default async function AuditLogPage() {
   });
 
   const ACTION_COLORS: Record<string, string> = {
-    DOCUMENT_CREATED:   "bg-blue-100 text-blue-700",
-    DOCUMENT_SUBMITTED: "bg-indigo-100 text-indigo-700",
-    REVIEW_DITERUSKAN:  "bg-green-100 text-green-700",
-    REVIEW_DIKEMBALIKAN:"bg-red-100 text-red-700",
-    DIRECTOR_DECISION_DISETUJUI: "bg-emerald-100 text-emerald-700",
-    DIRECTOR_DECISION_DITOLAK:   "bg-red-100 text-red-700",
-    DIRECTOR_DECISION_REVISI:    "bg-yellow-100 text-yellow-700",
-    DOCUMENT_ARCHIVED:  "bg-teal-100 text-teal-700",
-    USER_CREATED:       "bg-purple-100 text-purple-700",
-    USER_UPDATED:       "bg-orange-100 text-orange-700",
-    USER_DEACTIVATED:   "bg-gray-100 text-gray-700",
+    CREATE_SURAT: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+    UPLOAD_FILE: "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400",
+    REVIEW_SURAT: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400",
+    DECISION_MADE: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
+    ARCHIVE_SURAT: "bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400",
+    LOGIN: "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300",
+    UPDATE_USER: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400",
+    DELETE_USER: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+  };
+
+  const formatAction = (action: string) => {
+    return action
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
 
   return (
@@ -74,23 +78,25 @@ export default async function AuditLogPage() {
                   </td>
                   <td className="table-td font-medium whitespace-nowrap">{log.user.name}</td>
                   <td className="table-td">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">
                       {ROLE_LABELS[log.user.role as UserRole]}
                     </span>
                   </td>
                   <td className="table-td">
-                    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded ${
-                      ACTION_COLORS[log.action] ?? "bg-gray-100 text-gray-600"
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${
+                      ACTION_COLORS[log.action] ?? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                     }`}>
-                      {log.action}
+                      {formatAction(log.action)}
                     </span>
                   </td>
                   <td className="table-td max-w-xs">
-                    <p className="text-xs text-gray-600 truncate">{log.description ?? "-"}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 truncate font-medium">{log.description ?? "-"}</p>
                   </td>
                   <td className="table-td">
                     {log.suratMasuk ? (
-                      <span className="font-mono text-xs text-blue-700">{log.suratMasuk?.nomorSurat}</span>
+                      <span className="font-mono text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-2 py-1 rounded">
+                        {log.suratMasuk?.nomorSurat}
+                      </span>
                     ) : "-"}
                   </td>
                 </tr>

@@ -11,12 +11,12 @@ interface Props {
 }
 
 const colorMap = {
-  blue:   { bg: "bg-blue-50",   icon: "bg-blue-100 text-blue-700",   text: "text-blue-700" },
-  green:  { bg: "bg-green-50",  icon: "bg-green-100 text-green-700",  text: "text-green-700" },
-  yellow: { bg: "bg-yellow-50", icon: "bg-yellow-100 text-yellow-700",text: "text-yellow-700" },
-  red:    { bg: "bg-red-50",    icon: "bg-red-100 text-red-700",      text: "text-red-700" },
-  purple: { bg: "bg-purple-50", icon: "bg-purple-100 text-purple-700",text: "text-purple-700" },
-  orange: { bg: "bg-orange-50", icon: "bg-orange-100 text-orange-700",text: "text-orange-700" },
+  blue:   { bg: "bg-blue-50/50 dark:bg-blue-900/10",   icon: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",   text: "text-blue-700 dark:text-blue-400" },
+  green:  { bg: "bg-green-50/50 dark:bg-green-900/10",  icon: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",  text: "text-green-700 dark:text-green-400" },
+  yellow: { bg: "bg-yellow-50/50 dark:bg-yellow-900/10", icon: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400", text: "text-yellow-700 dark:text-yellow-400" },
+  red:    { bg: "bg-red-50/50 dark:bg-red-900/10",    icon: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",      text: "text-red-700 dark:text-red-400" },
+  purple: { bg: "bg-purple-50/50 dark:bg-purple-900/10", icon: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400", text: "text-purple-700 dark:text-purple-400" },
+  orange: { bg: "bg-orange-50/50 dark:bg-orange-900/10", icon: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400", text: "text-orange-700 dark:text-orange-400" },
 };
 
 export function StatCard({ title, value, icon: Icon, color = "blue", subtitle }: Props) {
@@ -27,9 +27,9 @@ export function StatCard({ title, value, icon: Icon, color = "blue", subtitle }:
         <Icon className="w-6 h-6" />
       </div>
       <div>
-        <p className="text-sm text-gray-600">{title}</p>
+        <p className="text-sm text-gray-600 dark:text-slate-400">{title}</p>
         <p className={cn("text-2xl font-bold", c.text)}>{value}</p>
-        {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{subtitle}</p>}
       </div>
     </div>
   );

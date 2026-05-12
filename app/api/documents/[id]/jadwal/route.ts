@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog, createStatusTimeline } from "@/lib/audit";
+import { DocumentStatus } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest, props: Params) {
         }),
         prisma.suratMasuk.update({
           where: { id: doc.id },
-          data: { currentStatus: newStatus as never },
+          data: { currentStatus: newStatus as DocumentStatus },
         }),
       ]);
 

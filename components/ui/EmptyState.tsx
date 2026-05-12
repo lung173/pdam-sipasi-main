@@ -16,11 +16,11 @@ export function EmptyState({
 }: Props) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <Icon className="w-8 h-8 text-gray-400" />
+      <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+        <Icon className="w-8 h-8 text-gray-400 dark:text-slate-500" />
       </div>
-      <h3 className="text-sm font-semibold text-gray-900 mb-1">{title}</h3>
-      <p className="text-sm text-gray-500 max-w-xs">{description}</p>
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
+      <p className="text-sm text-gray-500 dark:text-slate-400 max-w-xs">{description}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -42,8 +42,8 @@ export function PageLoading() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Memuat data...</p>
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-3" />
+        <p className="text-sm text-gray-500 dark:text-slate-400">Memuat data...</p>
       </div>
     </div>
   );

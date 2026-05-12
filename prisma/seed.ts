@@ -108,6 +108,8 @@ async function main() {
       currentStatus: "ARSIP_FINAL_TERSIMPAN",
       createdById: staff.id,
       currentHolder: agendaris.id,
+      documentType: "SURAT_MASUK",
+      category: "PENGADAAN",
     },
   });
 
@@ -123,6 +125,8 @@ async function main() {
       currentStatus: "KEPUTUSAN_DIREKTUR_SELESAI",
       createdById: staff2.id,
       currentHolder: direktur.id,
+      documentType: "SURAT_MASUK",
+      category: "KEUANGAN",
     },
   });
 
@@ -137,6 +141,8 @@ async function main() {
       currentStatus: "DIJADWALKAN_KE_DIREKTUR",
       createdById: staff.id,
       currentHolder: agendaris.id,
+      documentType: "UNDANGAN",
+      category: "UNDANGAN",
     },
   });
 
@@ -150,6 +156,8 @@ async function main() {
       tanggalSurat: new Date("2025-03-15"),
       currentStatus: "MENUNGGU_REVIEW_AGENDARIS",
       createdById: staff.id,
+      documentType: "SURAT_MASUK",
+      category: "TEKNIK",
     },
   });
 
@@ -161,10 +169,126 @@ async function main() {
       tanggalSurat: new Date("2025-04-01"),
       currentStatus: "DRAFT",
       createdById: staff2.id,
+      documentType: "SURAT_MASUK",
+      category: "KEPEGAWAIAN",
     },
   });
 
   console.log("✅ 5 Surat Masuk created");
+
+  // Surat Tugas
+  const surat6 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "006/ST/PDAM/2025",
+      perihal: "Surat Tugas Pelatihan Manajemen Air",
+      deskripsi: "Penugasan pegawai mengikuti pelatihan di Surabaya",
+      tujuan: "Budi Santoso",
+      asalSurat: "Internal - Sekretariat",
+      tanggalSurat: new Date("2025-04-10"),
+      currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR",
+      createdById: agendaris.id,
+      currentHolder: direktur.id,
+      documentType: "SURAT_TUGAS",
+      category: "KEPEGAWAIAN",
+    },
+  });
+
+  // Surat Keluar
+  const surat7 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "007/SK/PDAM/2025",
+      perihal: "Balasan Permohonan Kerjasama Penyediaan Air Bersih",
+      deskripsi: "Surat keluar ke Pemkot perihal kerjasama air bersih",
+      tujuan: "Pemerintah Kota Malang",
+      asalSurat: "PDAM Kota Malang",
+      tanggalSurat: new Date("2025-04-15"),
+      currentStatus: "MENUNGGU_REVIEW_AGENDARIS",
+      createdById: agendaris.id,
+      documentType: "SURAT_KELUAR",
+      category: "KERJASAMA",
+    },
+  });
+
+  // SK Direktur
+  const surat8 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "008/SKD/PDAM/2025",
+      perihal: "SK Pengangkatan Kepala Unit Pelayanan",
+      deskripsi: "Surat keputusan pengangkatan jabatan",
+      tujuan: "Seluruh Pegawai PDAM",
+      tanggalSurat: new Date("2025-05-01"),
+      currentStatus: "DRAFT",
+      createdById: agendaris.id,
+      documentType: "SK_DIREKTUR",
+      category: "KEPEGAWAIAN",
+    },
+  });
+
+  // Perjanjian
+  const surat9 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "009/PJ/PDAM/2025",
+      perihal: "Perjanjian Kerjasama Pengadaan Pipa PVC",
+      deskripsi: "Kontrak pengadaan pipa PVC dengan CV Baja Mandiri",
+      tujuan: "CV Baja Mandiri",
+      tanggalSurat: new Date("2025-05-05"),
+      currentStatus: "DIJADWALKAN_KE_DIREKTUR",
+      createdById: agendaris.id,
+      currentHolder: agendaris.id,
+      documentType: "PERJANJIAN",
+      category: "PENGADAAN",
+    },
+  });
+
+  // Peraturan Direktur
+  const surat10 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "010/PD/PDAM/2025",
+      perihal: "Peraturan Jam Kerja dan Lembur Pegawai",
+      deskripsi: "Penetapan aturan baru jam kerja efektif",
+      tujuan: "Seluruh Pegawai PDAM",
+      tanggalSurat: new Date("2025-05-10"),
+      currentStatus: "DRAFT",
+      createdById: direktur.id,
+      documentType: "PERATURAN_DIREKTUR",
+      category: "KEPEGAWAIAN",
+    },
+  });
+
+  // Undangan External
+  const surat11 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "011/UND-EXT/PDAM/2025",
+      perihal: "Undangan Seminar Nasional Pengelolaan Air",
+      deskripsi: "Undangan dari Kementerian PUPR untuk seminar nasional",
+      tujuan: "Direktur PDAM",
+      asalSurat: "Kementerian PUPR Jakarta",
+      tanggalSurat: new Date("2025-05-15"),
+      currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR",
+      createdById: agendaris.id,
+      currentHolder: direktur.id,
+      documentType: "UNDANGAN",
+      category: "UNDANGAN",
+    },
+  });
+
+  // Surat Keluar ke Instansi
+  const surat12 = await prisma.suratMasuk.create({
+    data: {
+      nomorSurat: "012/SK-EXT/PDAM/2025",
+      perihal: "Permohonan Izin Pemasangan Pipa Baru",
+      deskripsi: "Surat ke Dinas PU untuk izin galian jalan pemasangan pipa",
+      tujuan: "Dinas PU Kota Malang",
+      tanggalSurat: new Date("2025-05-20"),
+      currentStatus: "ARSIP_FINAL_TERSIMPAN",
+      createdById: agendaris.id,
+      currentHolder: agendaris.id,
+      documentType: "SURAT_KELUAR",
+      category: "PERIZINAN",
+    },
+  });
+
+  console.log("✅ 12 Dokumen created (7 jenis)");
 
   // ═══════════════════════════════════════════
   //  3. DOCUMENT FILES (6 file)

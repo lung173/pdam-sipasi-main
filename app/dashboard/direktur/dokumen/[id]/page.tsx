@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { DirectorDecisionPanel } from "@/components/documents/DirectorDecisionPanel";
 import { DirectorDisposisiPanel } from "@/components/documents/DirectorDisposisiPanel";
+import { FileListViewer } from "@/components/documents/FileListViewer";
 import { DECISION_LABELS } from "@/types";
 import { DecisionType } from "@prisma/client";
 
@@ -58,7 +59,6 @@ export default async function DirektuurDocumentDetail(props: Params) {
       where: { id: doc.id },
       data: { currentStatus: "DIPROSES_DIREKTUR" },
     });
-    // @ts-ignore - Update instance status so UI reflects the current state
     doc.currentStatus = "DIPROSES_DIREKTUR";
   }
 
@@ -87,11 +87,11 @@ export default async function DirektuurDocumentDetail(props: Params) {
               <StatusBadge status={doc.currentStatus} />
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <InfoRow icon={FileText}  label="Nomor Surat"   value={doc.nomorSurat} mono />
+              <InfoRow icon={FileText} label="Nomor Surat" value={doc.nomorSurat} mono />
               <InfoRow icon={Calendar} label="Tanggal Surat"
                 value={format(new Date(doc.tanggalSurat), "dd MMMM yyyy", { locale: localeId })} />
-              <InfoRow icon={Building} label="Tujuan"         value={doc.tujuan ?? "-"} />
-              <InfoRow icon={User}     label="Diajukan oleh"
+              <InfoRow icon={Building} label="Tujuan" value={doc.tujuan ?? "-"} />
+              <InfoRow icon={User} label="Diajukan oleh"
                 value={`${doc.createdBy.name} — ${doc.createdBy.divisi ?? "-"}`} />
             </div>
             {doc.deskripsi && (
@@ -114,32 +114,11 @@ export default async function DirektuurDocumentDetail(props: Params) {
           </div>
 
           {/* Files */}
-          <div className="card p-5 space-y-3">
-            <h3 className="font-semibold text-gray-900">Dokumen Terlampir</h3>
-            {doc.files.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">Tidak ada file terlampir.</p>
-            ) : (
-              <div className="space-y-2">
-                {doc.files.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <FileText className="w-5 h-5 text-blue-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{f.fileName}</p>
-                      <p className="text-xs text-gray-400">{f.fileType} · {f.uploadedBy.name}</p>
-                    </div>
-                    <a
-                      href={f.filePath}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 px-2 py-1 hover:bg-blue-50 rounded"
-                    >
-                      <Download className="w-3.5 h-3.5" /> Unduh
-                    </a>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <FileListViewer 
+            files={doc.files} 
+            title="Dokumen Terlampir" 
+            emptyMessage="Tidak ada file terlampir." 
+          />
 
           {/* Lembar Disposisi Panel — Direktur isi Disposisi Kepada + Instruksi */}
           {canDecide && (

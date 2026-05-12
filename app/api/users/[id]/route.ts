@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, props: Params) {
         select: {
           id: true, name: true, email: true, role: true,
           divisi: true, isActive: true, createdAt: true, updatedAt: true,
-          _count: { select: { documentsCreated: true, auditLogs: true } },
+          _count: { select: { suratMasukCreated: true, auditLogs: true } },
         },
       });
       if (!u) return errorResponse("Pengguna tidak ditemukan.", 404);

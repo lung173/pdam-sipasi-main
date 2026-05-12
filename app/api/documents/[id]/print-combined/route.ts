@@ -158,7 +158,7 @@ export async function GET(req: NextRequest, props: Params) {
       }
 
       const pdfBytes = await combinedPdf.save();
-      return new NextResponse(pdfBytes, {
+      return new NextResponse(Buffer.from(pdfBytes), {
         headers: {
           "Content-Type": "application/pdf",
           "Content-Disposition": `inline; filename="Surat_Gabungan_${doc.nomorSurat}.pdf"`,

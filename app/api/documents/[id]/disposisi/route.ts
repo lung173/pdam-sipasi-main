@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog, createStatusTimeline } from "@/lib/audit";
+import type { DocumentStatus } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest, props: Params) {
         await prisma.suratMasuk.update({
           where: { id: doc.id },
           data: {
-            currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR" as never,
+            currentStatus: "MENUNGGU_KEPUTUSAN_DIREKTUR" as DocumentStatus,
             currentHolder: "DIREKTUR",
             ...(nomorSurat && { nomorSurat }),
             ...(perihal && { perihal }),
@@ -91,13 +92,19 @@ export async function POST(req: NextRequest, props: Params) {
 
       // ── DIREKTUR: Buat / update LembarDisposisi ──
       const {
-        jabatanKe, instruksi, keterangan, tanggalPenyelesaian,
+        jabatanKe, instruksi, keterangan, tanggalPenyelesaian, tanggalInstruksi,
       } = body as {
         jabatanKe: string;
         instruksi?: string;
         keterangan?: string;
         tanggalPenyelesaian?: string;
+        tanggalInstruksi?: string;
       };
+
+      // Tanggal instruksi wajib diisi oleh Direktur
+      if (!tanggalInstruksi) {
+        return errorResponse("Tanggal instruksi wajib diisi oleh Direktur.", 400);
+      }
 
       if (!jabatanKe) {
         return errorResponse(
@@ -135,34 +142,42 @@ export async function POST(req: NextRequest, props: Params) {
       });
 
       let disposisi;
+      const dispoData = {
+        jabatanKe,
+        instruksi,
+        keterangan,
+        tanggalInstruksi: new Date(tanggalInstruksi),
+        tanggalPenyelesaian: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
+        dariId: user.id,
+      };
+
       if (existing) {
         disposisi = await prisma.lembarDisposisi.update({
           where: { id: existing.id },
-          data: {
-            jabatanKe,
-            instruksi,
-            keterangan,
-            tanggalTandaTangan: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
-            dariId: user.id,
-          } as any,
+          data: dispoData,
         });
       } else {
         disposisi = await prisma.lembarDisposisi.create({
           data: {
             suratMasukId: doc.id,
-            dariId: user.id,
-            jabatanKe,
-            instruksi,
-            keterangan,
-            tanggalTandaTangan: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
-          } as any,
+            ...dispoData,
+          },
         });
       }
+
+      // Update tanggalInstruksi dan tanggalPenyelesaian di dokumen utama
+      await prisma.suratMasuk.update({
+        where: { id: doc.id },
+        data: {
+          tanggalInstruksi: new Date(tanggalInstruksi),
+          tanggalPenyelesaian: tanggalPenyelesaian ? new Date(tanggalPenyelesaian) : null,
+        },
+      });
 
       await createStatusTimeline({
         suratMasukId: doc.id,
         fromStatus: prevStatus,
-        toStatus: prevStatus as never, // Status tidak berubah, hanya disposisi tersimpan
+        toStatus: prevStatus, // Status tidak berubah, hanya disposisi tersimpan
         changedBy: user.id,
         notes: `Direktur mengisi lembar disposisi. Kepada: ${jabatanKe}. Instruksi: ${instruksi}`,
       });

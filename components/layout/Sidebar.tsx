@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   FileText, LayoutDashboard, Users, ClipboardList,
-  Archive, CheckSquare, BookOpen, LogOut, FileSearch, X, UserCog
+  Archive, CheckSquare, BookOpen, LogOut, FileSearch, X, UserCog,
+  Mail, MailOpen, Send, Briefcase, Award, Handshake, ScrollText,
+  Calendar, Activity,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { UserRole } from "@prisma/client";
@@ -18,33 +20,37 @@ interface NavItem {
 
 const navByRole: Record<UserRole, NavItem[]> = {
   ADMIN_STAFF: [
-    { label: "Dashboard",       href: "/dashboard/staff",         icon: LayoutDashboard },
-    { label: "Dokumen Saya",    href: "/dashboard/staff/dokumen", icon: ClipboardList   },
+    { label: "Dashboard", href: "/dashboard/staff", icon: LayoutDashboard },
+    { label: "Dokumen Saya", href: "/dashboard/staff/dokumen", icon: ClipboardList },
   ],
   AGENDARIS: [
-    { label: "Dashboard",       href: "/dashboard/admin",         icon: LayoutDashboard },
-    { label: "Inbox Masuk",     href: "/dashboard/admin/inbox",   icon: ClipboardList   },
-    { label: "Review Dokumen",  href: "/dashboard/admin/review",  icon: FileSearch      },
-    { label: "Antrian Arsip",   href: "/dashboard/admin/arsip",   icon: Archive         },
-    { label: "Semua Dokumen",   href: "/dashboard/admin/dokumen", icon: BookOpen        },
-    { label: "Kelola Pengguna", href: "/dashboard/admin/users",   icon: Users           },
-    { label: "Audit Log",       href: "/dashboard/admin/audit",   icon: BookOpen        },
+    { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Undangan", href: "/dashboard/admin/undangan", icon: Calendar },
+    { label: "Surat Masuk", href: "/dashboard/admin/surat-masuk", icon: MailOpen },
+    { label: "Surat Tugas", href: "/dashboard/admin/surat-tugas", icon: Briefcase },
+    { label: "Surat Keluar", href: "/dashboard/admin/surat-keluar", icon: Send },
+    { label: "SK Direktur", href: "/dashboard/admin/sk-direktur", icon: Award },
+    { label: "Perjanjian", href: "/dashboard/admin/perjanjian", icon: Handshake },
+    { label: "Peraturan Direktur", href: "/dashboard/admin/peraturan", icon: ScrollText },
+    { label: "Arsip", href: "/dashboard/admin/arsip", icon: Archive },
+    { label: "Kelola Pengguna", href: "/dashboard/admin/users", icon: Users },
+    { label: "Audit Log", href: "/dashboard/admin/audit", icon: Activity },
   ],
   DIREKTUR: [
-    { label: "Dashboard",          href: "/dashboard/direktur",          icon: LayoutDashboard },
-    { label: "Menunggu Keputusan", href: "/dashboard/direktur/antrian",  icon: ClipboardList   },
-    { label: "Riwayat Keputusan",  href: "/dashboard/direktur/riwayat", icon: CheckSquare     },
-    { label: "Semua Dokumen",      href: "/dashboard/direktur/dokumen",  icon: BookOpen        },
+    { label: "Dashboard", href: "/dashboard/direktur", icon: LayoutDashboard },
+    { label: "Menunggu Keputusan", href: "/dashboard/direktur/antrian", icon: ClipboardList },
+    { label: "Riwayat Keputusan", href: "/dashboard/direktur/riwayat", icon: CheckSquare },
+    { label: "Semua Dokumen", href: "/dashboard/direktur/dokumen", icon: BookOpen },
   ],
   KABAG: [
-    { label: "Dashboard",       href: "/dashboard/kabag",         icon: LayoutDashboard },
-    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList   },
-    { label: "Semua Dokumen",   href: "/dashboard/kabag/dokumen",   icon: BookOpen        },
+    { label: "Dashboard", href: "/dashboard/kabag", icon: LayoutDashboard },
+    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList },
+    { label: "Semua Dokumen", href: "/dashboard/kabag/dokumen", icon: BookOpen },
   ],
   KASUBAG: [
-    { label: "Dashboard",       href: "/dashboard/kabag",         icon: LayoutDashboard },
-    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList   },
-    { label: "Semua Dokumen",   href: "/dashboard/kabag/dokumen",   icon: BookOpen        },
+    { label: "Dashboard", href: "/dashboard/kabag", icon: LayoutDashboard },
+    { label: "Disposisi Masuk", href: "/dashboard/kabag/disposisi", icon: ClipboardList },
+    { label: "Semua Dokumen", href: "/dashboard/kabag/dokumen", icon: BookOpen },
   ],
 };
 
@@ -60,22 +66,35 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
   const navItems = navByRole[role] ?? [];
 
   const activeHref = navItems
-    .filter(item => pathname === item.href || pathname.startsWith(item.href + "/"))
-    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+    .filter(item => {
+      // Prioritaskan match persis
+      if (pathname === item.href) return true;
+      
+      // Untuk menu utama (Dashboard), jangan biarkan 'startsWith' menangkap semua sub-page.
+      // Kecuali jika memang tidak ada menu lain yang lebih spesifik.
+      const isRootPath = ["/dashboard/admin", "/dashboard/staff", "/dashboard/direktur", "/dashboard/kabag"].includes(item.href);
+      if (isRootPath) return false;
+      
+      return pathname.startsWith(item.href + "/");
+    })
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href || (
+      // Fallback: Jika tidak ada yang cocok tapi kita di sub-page dashboard, highlight Dashboard saja
+      navItems.find(n => pathname.startsWith(n.href))?.href
+    );
 
   const roleLabel: Record<UserRole, string> = {
     ADMIN_STAFF: "Admin Staff",
-    AGENDARIS:   "Agendaris",
-    DIREKTUR:    "Direktur Utama",
-    KABAG:       "Kepala Bagian",
-    KASUBAG:     "Kepala Sub Bagian",
+    AGENDARIS: "Agendaris",
+    DIREKTUR: "Direktur Utama",
+    KABAG: "Kepala Bagian",
+    KASUBAG: "Kepala Sub Bagian",
   };
 
   return (
     <aside
       className={cn(
         "print:hidden group",
-        "bg-blue-900 text-white flex flex-col shrink-0 z-40 transition-[width,transform] duration-300 ease-in-out",
+        "bg-blue-900 dark:bg-slate-950 text-white flex flex-col shrink-0 z-40 transition-[width,transform] duration-300 ease-in-out border-r border-blue-800 dark:border-slate-900",
         /* Desktop: collapsable */
         "md:relative md:translate-x-0 md:w-20 md:hover:w-64",
         /* Mobile: fixed overlay */
@@ -84,7 +103,7 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
       )}
     >
       {/* Logo + close button */}
-      <div className="px-5 py-5 border-b border-blue-800 flex items-center h-[76px] box-border overflow-hidden">
+      <div className="px-5 py-5 border-b border-blue-800 dark:border-slate-900 flex items-center h-[76px] box-border overflow-hidden">
         <div className="flex items-center gap-3 w-full">
           <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
             <FileText className="w-5 h-5 shrink-0" />
@@ -104,24 +123,24 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
       </div>
 
       {/* User info */}
-      <div className="px-5 py-4 border-b border-blue-800 flex items-center h-[90px] box-border relative overflow-hidden">
-         {/* Collapsed Avatar (Desktop only) */}
-         <div className="hidden md:flex group-hover:md:hidden absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-blue-800 rounded-full items-center justify-center shrink-0 overflow-hidden border border-blue-700">
-            {/* Try to get image from a prop or session if needed, but since Sidebar is a server/client hybrid, I'll use a placeholder or initials for now unless I pass image down. */}
-            <span className="font-bold text-sm">{userName.charAt(0).toUpperCase()}</span>
-         </div>
-         {/* Full User Info */}
-         <div className="flex-1 min-w-[180px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+      <div className="px-5 py-4 border-b border-blue-800 dark:border-slate-900 flex items-center h-[90px] box-border relative overflow-hidden">
+        {/* Collapsed Avatar (Desktop only) */}
+        <div className="hidden md:flex group-hover:md:hidden absolute left-1/2 -translate-x-1/2 w-10 h-10 bg-blue-800 rounded-full items-center justify-center shrink-0 overflow-hidden border border-blue-700">
+          {/* Try to get image from a prop or session if needed, but since Sidebar is a server/client hybrid, I'll use a placeholder or initials for now unless I pass image down. */}
+          <span className="font-bold text-sm">{userName.charAt(0).toUpperCase()}</span>
+        </div>
+        {/* Full User Info */}
+        <div className="flex-1 min-w-[180px] transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
           <p className="text-sm text-blue-400 mb-1">Login sebagai</p>
           <p className="font-semibold text-base leading-tight truncate">{userName}</p>
           <span className="inline-block mt-1 text-sm bg-blue-700 px-2 py-0.5 rounded-full text-blue-100 truncate">
             {roleLabel[role]}
           </span>
-         </div>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = item.href === activeHref;
@@ -131,7 +150,7 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-base transition-colors relative",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative",
                 active
                   ? "bg-blue-700 text-white font-medium"
                   : "text-blue-200 hover:bg-blue-800 hover:text-white"
@@ -149,4 +168,3 @@ export function Sidebar({ role, userName, isOpen = false, onClose }: Props) {
     </aside>
   );
 }
-

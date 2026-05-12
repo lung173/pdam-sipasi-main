@@ -46,6 +46,7 @@ export async function POST(req: NextRequest, props: Params) {
       const serverLocation =
         parsed.data.serverLocation ?? `/arsip/${new Date().getFullYear()}/${doc.nomorSurat}`;
 
+      const now = new Date();
       const [archive, updatedDoc] = await prisma.$transaction([
         prisma.archive.create({
           data: {
@@ -53,6 +54,8 @@ export async function POST(req: NextRequest, props: Params) {
             archivedById: user.id,
             serverLocation,
             notes: parsed.data.notes,
+            bulan: now.getMonth() + 1,
+            tahun: now.getFullYear(),
           },
         }),
         prisma.suratMasuk.update({

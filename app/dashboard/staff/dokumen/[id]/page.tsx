@@ -12,6 +12,7 @@ import { StatusTimeline } from "@/components/documents/StatusTimeline";
 import { FileUpload } from "@/components/documents/FileUpload";
 import { StaffActionPanel } from "@/components/documents/StaffActionPanel";
 import { DisposisiViewer } from "@/components/documents/DisposisiViewer";
+import { FileListViewer } from "@/components/documents/FileListViewer";
 import { DECISION_LABELS } from "@/types";
 import { DecisionType } from "@prisma/client";
 
@@ -147,30 +148,11 @@ export default async function StaffDocumentDetail(props: Params) {
           )}
 
           {/* Files */}
-          <div className="card p-5 space-y-3">
-            <h3 className="font-semibold text-gray-900">File Dokumen</h3>
-            {doc.files.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">Belum ada file yang diupload.</p>
-            ) : (
-              <div className="space-y-2">
-                {doc.files.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{f.fileName}</p>
-                      <p className="text-xs text-gray-400">
-                        {f.fileType} · {f.uploadedBy.name} ·{" "}
-                        {f.fileSize ? `${(f.fileSize / 1024).toFixed(0)} KB` : ""}
-                      </p>
-                    </div>
-                    <a href={f.filePath} target="_blank" rel="noreferrer"
-                       className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </div>
-                ))}
-              </div>
-            )}
+          <FileListViewer 
+            files={doc.files} 
+            title="File Dokumen" 
+            emptyMessage="Belum ada file yang diupload." 
+          />
 
             {/* Upload draft jika masih di awal */}
             {["DRAFT", "PERLU_REVISI"].includes(doc.currentStatus) && (

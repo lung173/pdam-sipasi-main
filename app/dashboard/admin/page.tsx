@@ -1,4 +1,4 @@
-﻿// app/dashboard/admin/page.tsx
+// app/dashboard/admin/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
@@ -9,7 +9,7 @@ import { id as localeId } from "date-fns/locale";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ROLE_LABELS } from "@/types";
-import { UserRole } from "@prisma/client";
+import { UserRole, DocumentStatus } from "@prisma/client";
 import {
   FileText, Users, Archive, CheckCircle, Eye, ArrowRight,
   Activity, Clock,
@@ -165,7 +165,7 @@ export default async function AdminDashboard() {
           {Object.entries(statusCounts).map(([status, count]) => (
             <div key={status} className="text-center p-3 bg-gray-50 rounded-xl">
               <p className="text-2xl font-bold text-gray-900">{count}</p>
-              <StatusBadge status={status as never} size="sm" />
+              <StatusBadge status={status as DocumentStatus} size="sm" />
             </div>
           ))}
         </div>

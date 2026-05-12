@@ -69,6 +69,7 @@ export function AgendarisActionPanel({
   const [editAsalSurat, setEditAsalSurat] = useState(doc.asalSurat ?? "");
   const [editNomorAgenda, setEditNomorAgenda] = useState(doc.nomorAgenda ?? "");
   const [editCategory, setEditCategory] = useState(doc.category ?? "DLL");
+  const [editTanggalPenyelesaian, setEditTanggalPenyelesaian] = useState("");
 
   const reset = () => {
     setMode("idle");
@@ -80,6 +81,7 @@ export function AgendarisActionPanel({
     setEditTanggalTerima(toDateInput(doc.tanggalTerima));
     setEditAsalSurat(doc.asalSurat ?? "");
     setEditNomorAgenda(doc.nomorAgenda ?? "");
+    setEditTanggalPenyelesaian("");
   };
 
   const submitTeruskan = async () => {
@@ -138,6 +140,7 @@ export function AgendarisActionPanel({
           tanggalSurat: editTanggalSurat || undefined,
           tanggalTerima: editTanggalTerima || undefined,
           category: editCategory,
+          tanggalPenyelesaian: editTanggalPenyelesaian || undefined,
         }),
       });
       const json = await res.json();
@@ -383,21 +386,36 @@ export function AgendarisActionPanel({
                     />
                   </FormEditRow>
                 </div>
-                {/* Row 4: Kategori Keperluan */}
+                {/* Row 4: Kategori Keperluan — satu per satu */}
                 <div className="grid grid-cols-1 divide-gray-300">
                   <FormEditRow label="Kategori Keperluan">
-                    <select
-                      className="form-input text-xs py-1"
-                      value={editCategory}
-                      onChange={(e) => setEditCategory(e.target.value)}
-                    >
-                      <option value="UNDANGAN">UNDANGAN</option>
-                      <option value="PEMBELIAN">PEMBELIAN</option>
-                      <option value="KERJASAMA">KERJASAMA</option>
-                      <option value="KEPEGAWAIAN">KEPEGAWAIAN</option>
-                      <option value="KEUANGAN">KEUANGAN</option>
-                      <option value="DLL">DAN LAIN-LAIN (DLL)</option>
-                    </select>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+                      {[
+                        { value: "UNDANGAN", label: "Undangan" },
+                        { value: "PEMBELIAN", label: "Pembelian" },
+                        { value: "KERJASAMA", label: "Kerjasama" },
+                        { value: "KEPEGAWAIAN", label: "Kepegawaian" },
+                        { value: "KEUANGAN", label: "Keuangan" },
+                        { value: "PERIZINAN", label: "Perizinan" },
+                        { value: "PENGADAAN", label: "Pengadaan" },
+                        { value: "HUKUM", label: "Hukum" },
+                        { value: "TEKNIK", label: "Teknik" },
+                        { value: "DLL", label: "Lain-lain" },
+                      ].map((cat) => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => setEditCategory(cat.value)}
+                          className={`px-2 py-1.5 rounded-md border text-[10px] font-medium transition-all text-center
+                            ${editCategory === cat.value
+                              ? "border-blue-500 bg-blue-50 text-blue-800 ring-1 ring-blue-300"
+                              : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
                   </FormEditRow>
                 </div>
               </div>
@@ -429,16 +447,30 @@ export function AgendarisActionPanel({
                   </div>
                 </div>
 
-                {/* Right: Tanggal Penyelesaian + Catatan — read-only */}
-                <div className="p-3 space-y-3">
-                  <div>
-                    <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
-                      Tanggal Penyelesaian :
-                    </p>
-                    <div className="form-input text-xs bg-gray-50 text-gray-400 cursor-not-allowed border-dashed">
-                      Diisi oleh Direktur
+                {/* Right: Tanggal Instruksi + Penyelesaian + Catatan — read-only */}
+                  <div className="p-3 space-y-3">
+                    <div>
+                      <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+                        Tanggal Instruksi :
+                      </p>
+                      <div className="form-input text-xs bg-amber-50 text-amber-600 cursor-not-allowed border-dashed border-amber-300">
+                        ⚠️ Wajib diisi oleh Direktur
+                      </div>
                     </div>
-                  </div>
+                    <div>
+                      <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+                        Tanggal Penyelesaian :
+                      </p>
+                      <input
+                        type="date"
+                        className="form-input text-xs py-1 w-full"
+                        value={editTanggalPenyelesaian}
+                        onChange={(e) => setEditTanggalPenyelesaian(e.target.value)}
+                      />
+                      <p className="text-[9px] text-blue-500 mt-1 font-medium italic">
+                        ✦ Diisi oleh Agendaris
+                      </p>
+                    </div>
                   <div>
                     <p className="font-bold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
                       Catatan :

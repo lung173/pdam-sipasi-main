@@ -4,11 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog, createStatusTimeline } from "@/lib/audit";
 import { directorDecisionSchema } from "@/lib/validations";
+import { DocumentStatus } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
 // POST /api/documents/[id]/decision
 // Direktur memberikan keputusan
+// Wajib mengisi tanggalInstruksi
+// Checkbox batalTandaTangan untuk skip auto-sign barcode
 export async function POST(req: NextRequest, props: Params) {
   const params = await props.params;
   return requireAuth(req, async (user, request) => {
@@ -21,10 +24,10 @@ export async function POST(req: NextRequest, props: Params) {
       const parsed = directorDecisionSchema.safeParse(body);
 
       if (!parsed.success) {
-        return errorResponse("Validasi gagal.", 422);
+        return errorResponse("Validasi gagal. Pastikan tanggal instruksi telah diisi.", 422);
       }
 
-      const { decisionType, decisionNote, autoSign } = parsed.data;
+      const { decisionType, decisionNote, autoSign, tanggalInstruksi, batalTandaTangan } = parsed.data;
 
       const doc = await prisma.suratMasuk.findUnique({ 
         where: { id: params.id },
@@ -47,8 +50,8 @@ export async function POST(req: NextRequest, props: Params) {
       let nextHolder = "AGENDARIS"; // Admin karena Agendaris dihapus
       let auditExtraDescription = "";
 
-      // AUTO-SIGN LOGIC
-      if (decisionType === "DISETUJUI" && autoSign) {
+      // AUTO-SIGN LOGIC — skip jika batalTandaTangan = true
+      if (decisionType === "DISETUJUI" && autoSign && !batalTandaTangan) {
         const draftFile = doc.files.find((f: { fileType: string }) => f.fileType === "DRAFT");
         if (draftFile) {
           try {
@@ -100,6 +103,11 @@ export async function POST(req: NextRequest, props: Params) {
         }
       }
 
+      // Jika batalTandaTangan, tambahkan catatan
+      if (batalTandaTangan) {
+        auditExtraDescription += " (Tanda tangan dibatalkan oleh Direktur)";
+      }
+
       // Record ke database
       const [decision, updatedDoc] = await prisma.$transaction([
         prisma.directorDecision.create({
@@ -108,13 +116,16 @@ export async function POST(req: NextRequest, props: Params) {
             directorId: user.id,
             decisionType,
             decisionNote,
+            tanggalInstruksi: new Date(tanggalInstruksi),
+            batalTandaTangan: batalTandaTangan ?? false,
           },
         }),
         prisma.suratMasuk.update({
           where: { id: doc.id },
           data: {
-            currentStatus: nextStatus as any,
+            currentStatus: nextStatus as DocumentStatus,
             currentHolder: nextHolder,
+            tanggalInstruksi: new Date(tanggalInstruksi),
           },
         }),
       ]);
@@ -129,7 +140,7 @@ export async function POST(req: NextRequest, props: Params) {
       await createStatusTimeline({
         suratMasukId: doc.id,
         fromStatus: prevStatus,
-        toStatus: nextStatus as any,
+        toStatus: nextStatus as DocumentStatus,
         changedBy: user.id,
         notes: `Direktur memberikan keputusan: ${decisionLabels[decisionType]}. ${decisionNote ?? ""}${auditExtraDescription}`,
       });
@@ -139,7 +150,7 @@ export async function POST(req: NextRequest, props: Params) {
         suratMasukId: doc.id,
         action: `DIRECTOR_DECISION_${decisionType}`,
         description: `Direktur memberi keputusan ${decisionType} untuk dokumen ${doc.nomorSurat}`,
-        metadata: { decisionType, decisionNote },
+        metadata: { decisionType, decisionNote, tanggalInstruksi, batalTandaTangan },
         ipAddress: getClientIp(request),
       });
 

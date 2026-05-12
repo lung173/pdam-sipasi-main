@@ -3,6 +3,8 @@
  * @description Definisi tipe data (interfaces & types) global untuk aplikasi.
  * Menyediakan standarisasi struktur data untuk dokumen, user, timeline, 
  * serta mapping label dan warna untuk status dokumen.
+ * Mendukung 7 jenis surat: Undangan, Surat Masuk, Surat Tugas,
+ * Surat Keluar, SK Direktur, Perjanjian, Peraturan Direktur.
  */
 // types/index.ts
 
@@ -12,9 +14,12 @@ import {
   DecisionType,
   FileType,
   ReviewStatus,
+  DocumentType,
+  UndanganType,
+  DocumentCategory,
 } from "@prisma/client";
 
-export type { UserRole, DocumentStatus, DecisionType, FileType, ReviewStatus };
+export type { UserRole, DocumentStatus, DecisionType, FileType, ReviewStatus, DocumentType, UndanganType, DocumentCategory };
 
 // ─────────────────────────────────────────────
 //  USER TYPES
@@ -46,6 +51,8 @@ export interface DocumentListItem {
   asalSurat: string | null;
   tanggalSurat: Date | string;
   currentStatus: DocumentStatus;
+  documentType: DocumentType;
+  category: DocumentCategory;
   createdAt: Date | string;
   createdBy: {
     id: string;
@@ -55,6 +62,11 @@ export interface DocumentListItem {
 }
 
 export interface DocumentDetail extends DocumentListItem {
+  deskripsi?: string | null;
+  nomorAgenda?: string | null;
+  tanggalTerima: Date | string;
+  tanggalInstruksi?: Date | string | null;
+  tanggalPenyelesaian?: Date | string | null;
   files: DocumentFileItem[];
   reviews: ReviewItem[];
   decisions: DecisionItem[];
@@ -91,6 +103,8 @@ export interface DecisionItem {
   tempat: string | null;
   tanggalTandaTangan: Date | string | null;
   parafDirektur: string | null;
+  tanggalInstruksi: Date | string | null;
+  batalTandaTangan: boolean;
   decidedAt: Date | string;
   director: { name: string };
 }
@@ -129,6 +143,8 @@ export interface DisposisiItem {
   tempat: string | null;
   tanggalTandaTangan: Date | string | null;
   parafDariId: string | null;
+  tanggalInstruksi: Date | string | null;
+  tanggalPenyelesaian: Date | string | null;
   dari: { name: string };
   ke: { name: string } | null;
   createdAt: Date | string;
@@ -144,6 +160,9 @@ export interface UndanganItem {
   dresscode: string | null;
   catatanLain: string | null;
   deadline: Date | string;
+  undanganType: UndanganType;
+  pengirimExternal: string | null;
+  kontakExternal: string | null;
 }
 
 // ─────────────────────────────────────────────
@@ -175,6 +194,7 @@ export interface CreateDocumentInput {
   perihal: string;
   asalSurat?: string;
   tanggalSurat: string; // ISO date string
+  documentType?: DocumentType;
 }
 
 export interface ReviewDocumentInput {
@@ -188,6 +208,8 @@ export interface DirectorDecisionInput {
   decisionType: DecisionType;
   decisionNote?: string;
   tempat?: string;
+  tanggalInstruksi?: string;
+  batalTandaTangan?: boolean;
 }
 
 export interface ArchiveDocumentInput {
@@ -215,17 +237,17 @@ export const STATUS_LABELS: Record<DocumentStatus, string> = {
 };
 
 export const STATUS_COLORS: Record<DocumentStatus, string> = {
-  DRAFT: "bg-gray-100 text-gray-700",
-  MENUNGGU_REVIEW_AGENDARIS: "bg-yellow-100 text-yellow-800",
-  PERLU_REVISI: "bg-red-100 text-red-700",
-  DIJADWALKAN_KE_DIREKTUR: "bg-blue-100 text-blue-800",
-  MENUNGGU_KEPUTUSAN_DIREKTUR: "bg-indigo-100 text-indigo-800",
-  DIPROSES_DIREKTUR: "bg-purple-100 text-purple-800",
-  KEPUTUSAN_DIREKTUR_SELESAI: "bg-orange-100 text-orange-800",
-  MENUNGGU_PENGAMBILAN_STAFF: "bg-teal-100 text-teal-800",
-  MENUNGGU_SCAN_FINAL: "bg-lime-100 text-lime-800",
-  MENUNGGU_ARSIP_ADMIN: "bg-cyan-100 text-cyan-800",
-  ARSIP_FINAL_TERSIMPAN: "bg-green-100 text-green-800",
+  DRAFT: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+  MENUNGGU_REVIEW_AGENDARIS: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500",
+  PERLU_REVISI: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+  DIJADWALKAN_KE_DIREKTUR: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400",
+  MENUNGGU_KEPUTUSAN_DIREKTUR: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-400",
+  DIPROSES_DIREKTUR: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400",
+  KEPUTUSAN_DIREKTUR_SELESAI: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400",
+  MENUNGGU_PENGAMBILAN_STAFF: "bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-400",
+  MENUNGGU_SCAN_FINAL: "bg-lime-100 dark:bg-lime-900/30 text-lime-800 dark:text-lime-400",
+  MENUNGGU_ARSIP_ADMIN: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-400",
+  ARSIP_FINAL_TERSIMPAN: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400",
 };
 
 export const DECISION_LABELS: Record<DecisionType, string> = {
@@ -241,4 +263,41 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   DIREKTUR:    "Direktur Utama",
   KABAG:       "Kepala Bagian",
   KASUBAG:     "Kepala Sub Bagian",
+};
+
+// ─────────────────────────────────────────────
+//  DOCUMENT TYPE LABELS & COLORS (7 jenis surat)
+// ─────────────────────────────────────────────
+
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  UNDANGAN:           "Undangan",
+  SURAT_MASUK:        "Surat Masuk",
+  SURAT_TUGAS:        "Surat Tugas",
+  SURAT_KELUAR:       "Surat Keluar",
+  SK_DIREKTUR:        "SK Direktur",
+  PERJANJIAN:         "Perjanjian",
+  PERATURAN_DIREKTUR: "Peraturan Direktur",
+};
+
+export const DOCUMENT_TYPE_COLORS: Record<DocumentType, string> = {
+  UNDANGAN:           "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400",
+  SURAT_MASUK:        "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400",
+  SURAT_TUGAS:        "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400",
+  SURAT_KELUAR:       "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400",
+  SK_DIREKTUR:        "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400",
+  PERJANJIAN:         "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-400",
+  PERATURAN_DIREKTUR: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400",
+};
+
+export const CATEGORY_LABELS: Record<DocumentCategory, string> = {
+  UNDANGAN:    "Undangan",
+  PEMBELIAN:   "Pembelian",
+  KERJASAMA:   "Kerjasama",
+  KEPEGAWAIAN: "Kepegawaian",
+  KEUANGAN:    "Keuangan",
+  PERIZINAN:   "Perizinan",
+  PENGADAAN:   "Pengadaan",
+  HUKUM:       "Hukum",
+  TEKNIK:      "Teknik",
+  DLL:         "Dan Lain-Lain",
 };

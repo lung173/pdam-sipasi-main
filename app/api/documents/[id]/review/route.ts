@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog, createStatusTimeline } from "@/lib/audit";
 import { reviewDocumentSchema } from "@/lib/validations";
+import { DocumentStatus } from "@prisma/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest, props: Params) {
         prisma.suratMasuk.update({
           where: { id: doc.id },
           data: {
-            currentStatus: newStatus as never,
+            currentStatus: newStatus as DocumentStatus,
             currentHolder: newHolder,
           },
         }),

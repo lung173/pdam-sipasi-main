@@ -1,6 +1,7 @@
 // app/api/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { requireRole, successResponse, errorResponse, getClientIp } from "@/lib/auth-helpers";
 import { createAuditLog } from "@/lib/audit";
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 
       const users = await prisma.user.findMany({
         where: {
-          ...(role ? { role: role as never } : {}),
+          ...(role ? { role: role as UserRole } : {}),
           ...(search
             ? {
                 OR: [
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
           name,
           email,
           passwordHash: bcrypt.hashSync(password, 12),
-          role: newRole as never,
+          role: newRole as UserRole,
           divisi,
         },
         select: {

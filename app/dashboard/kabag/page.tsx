@@ -40,7 +40,7 @@ export default async function KabagDashboard() {
           { jabatanKe: { contains: "Kabag", mode: "insensitive" } },
           { jabatanKe: { contains: session.user.divisi || "umum", mode: "insensitive" } }
         ],
-        suratMasuk: { NOT: { currentStatus: "SELESAI_ARSIP" } }
+        suratMasuk: { NOT: { currentStatus: "ARSIP_FINAL_TERSIMPAN" } }
       }
     }),
     prisma.lembarDisposisi.count({
@@ -49,7 +49,7 @@ export default async function KabagDashboard() {
           { keId: session.user.id },
           { jabatanKe: { contains: "Kabag", mode: "insensitive" } }
         ],
-        suratMasuk: { currentStatus: "SELESAI_ARSIP" }
+        suratMasuk: { currentStatus: "ARSIP_FINAL_TERSIMPAN" }
       }
     }),
     prisma.lembarDisposisi.findMany({
@@ -138,7 +138,7 @@ export default async function KabagDashboard() {
                   <p className="text-sm font-bold text-gray-900 truncate">{disp.suratMasuk.perihal}</p>
                   <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Instruksi Direktur:</p>
-                    <p className="text-sm text-gray-700 italic">"{disp.instruksi || "Lakukan tindak lanjut sesuai prosedur."}"</p>
+                    <p className="text-sm text-gray-700 italic">&ldquo;{disp.instruksi ? disp.instruksi : "Lakukan tindak lanjut sesuai prosedur."}&rdquo;</p>
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
                     Diteruskan oleh: <span className="font-medium text-gray-600">{disp.dari.name}</span> ·{" "}

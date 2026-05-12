@@ -47,10 +47,8 @@ export default async function GlobalSearchPage(props: Params) {
 
   // Filter privasi untuk Staff
   if (!isPowerUser) {
-    where.AND = [
-      ...(where.AND as any[] || []),
-      { createdById: session.user.id }
-    ];
+    const currentAnd = (where.AND as Prisma.SuratMasukWhereInput[]) || [];
+    where.AND = [...currentAnd, { createdById: session.user.id }];
   }
 
   const results = await prisma.suratMasuk.findMany({

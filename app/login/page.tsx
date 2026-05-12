@@ -30,7 +30,6 @@ export default function LoginPage() {
         toast.error("Login gagal.");
       } else {
         toast.success("Login berhasil! Mengalihkan...");
-        // Redirect berdasarkan role akan ditangani oleh middleware & halaman /dashboard
         router.push("/dashboard");
         router.refresh();
       }
@@ -42,7 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full" />
@@ -52,24 +51,24 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl mb-4 border border-white/20">
             <FileText className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">SIPAS PDAM</h1>
-          <p className="text-blue-200 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-white tracking-tight">SIPAS PDAM</h1>
+          <p className="text-blue-100 text-sm mt-1 font-medium">
             Sistem Informasi Pengelolaan Arsip Surat
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Masuk ke Sistem</h2>
-          <p className="text-sm text-gray-500 mb-6">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 transition-all">
+          <h2 className="text-xl font-bold text-slate-900 mb-1">Masuk ke Sistem</h2>
+          <p className="text-sm text-slate-500 mb-8">
             Gunakan akun yang telah diberikan oleh Administrator.
           </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700 font-medium">
               {error}
             </div>
           )}
@@ -110,7 +109,7 @@ export default function LoginPage() {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -120,11 +119,11 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center py-2.5"
+              className="btn-primary w-full justify-center py-3.5 text-base font-bold"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Memverifikasi...
                 </>
               ) : (
@@ -134,20 +133,26 @@ export default function LoginPage() {
           </form>
 
           {/* Demo credentials */}
-          <details className="mt-6">
-            <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600 select-none">
-              Akun Demo (Development)
+          <details className="mt-8 group">
+            <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600 select-none flex items-center gap-2">
+              <span className="font-bold">Akun Demo (Development)</span>
+              <div className="h-px flex-1 bg-slate-100" />
             </summary>
-            <div className="mt-2 text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg">
-              <div><span className="font-medium">Admin Staff:</span> staff@pdam.go.id / Staff@12345</div>
-              <div><span className="font-medium">Agendaris:</span> agendaris@pdam.go.id / Agendaris@12345</div>
-              <div><span className="font-medium">Direktur:</span> direktur@pdam.go.id / Direktur@12345</div>
+            <div className="mt-4 text-[11px] text-slate-500 space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="font-bold text-slate-700">Admin Staff 1:</span> staff@pdam.go.id</div>
+                <div><span className="font-bold text-slate-700">Admin Staff 2:</span> staff2@pdam.go.id</div>
+                <div><span className="font-bold text-slate-700">Agendaris:</span> agendaris@pdam.go.id</div>
+                <div><span className="font-bold text-slate-700">Direktur:</span> direktur@pdam.go.id</div>
+                <div><span className="font-bold text-slate-700">Kabag:</span> kabag@pdam.go.id</div>
+              </div>
+              <p className="mt-2 text-slate-400 italic">Password standar: Nama@12345 (contoh: Staff@12345)</p>
             </div>
           </details>
         </div>
 
-        <p className="text-center text-blue-200 text-xs mt-6">
-          © {new Date().getFullYear()} PDAM. Sistem ini hanya untuk penggunaan internal.
+        <p className="text-center text-blue-100 text-[10px] font-bold uppercase tracking-widest mt-8 opacity-80">
+          © {new Date().getFullYear()} PDAM • Sistem Informasi Pengelolaan Arsip Surat
         </p>
       </div>
     </div>

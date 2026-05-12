@@ -1,11 +1,9 @@
-﻿// app/dashboard/staff/scan-final/page.tsx
+// app/dashboard/staff/scan-final/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DocumentTable } from "@/components/documents/DocumentTable";
-import { Scanner } from "lucide-react"; // Assuming lucide-react has a similar icon or we can use FileText
-// Actually 'Scanner' might not exist in lucide-react standard, usually it's `ScanText` or `Printer` or `Scan`. Let's use `ScanText` or fallback to `FileText`. I will import FileText.
 import { ScanText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 

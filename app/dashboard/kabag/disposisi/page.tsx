@@ -89,7 +89,7 @@ export default async function KabagDisposisiList() {
                     </td>
                     <td className="px-5 py-4 max-w-xs">
                       <p className="text-sm text-gray-700 line-clamp-2 italic">
-                        "{disp.instruksi || "N/A"}"
+                        &ldquo;{disp.instruksi ? disp.instruksi : "N/A"}&rdquo;
                       </p>
                     </td>
                     <td className="px-5 py-4 whitespace-nowrap">
